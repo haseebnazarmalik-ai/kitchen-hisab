@@ -27,7 +27,6 @@
 
         .user-total-info { background: #dcf8c6; padding: 12px; border-radius: 10px; text-align: center; font-weight: bold; margin-bottom: 15px; color: #075e54; border: 1px solid #c1e0a8; }
         
-        /* Header PDF Button Style */
         .pdf-header-btn { background: #34b7f1; color: white; border: none; padding: 5px 8px; border-radius: 5px; font-weight: bold; font-size: 11px; cursor: pointer; }
 
         .date-separator { text-align: center; margin: 20px 0 10px; position: relative; }
@@ -43,7 +42,6 @@
         .edit-text { color: #25d366; font-weight: bold; font-size: 13px; cursor: pointer; border: none; background: none; }
         .delete-text { color: #e53935; font-weight: bold; font-size: 13px; cursor: pointer; border: none; background: none; }
 
-        /* Loader & Toast */
         #loaderOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.7); z-index: 10000; align-items: center; justify-content: center; flex-direction: column; }
         .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #075e54; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -52,12 +50,9 @@
         #toast.show { visibility: visible; animation: fadeInOut 3s; }
         @keyframes fadeInOut { 0%, 100% { opacity: 0; } 10%, 90% { opacity: 1; } }
 
-        /* Dialog Modals (Original Design) */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
         .modal-box { background: white; padding: 25px; border-radius: 20px; width: 80%; max-width: 300px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: popIn 0.3s ease; }
         @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        .modal-box h3 { margin: 0 0 10px; color: #333; }
-        .modal-box p { color: #666; font-size: 14px; margin-bottom: 25px; }
         .modal-box input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
         .modal-btns { display: flex; gap: 10px; }
         .btn-cancel { flex: 1; padding: 12px; border-radius: 10px; background: #f0f0f0; border: none; font-weight: bold; color: #555; }
@@ -71,7 +66,7 @@
 
 <div id="loaderOverlay">
     <div class="spinner"></div>
-    <p style="color: #075e54; font-weight: bold; margin-top: 10px;">Generating Full Report...</p>
+    <p style="color: #075e54; font-weight: bold; margin-top: 10px;">Generating Sorted Report...</p>
 </div>
 <div id="toast">Check download file in download folder</div>
 
@@ -122,8 +117,7 @@
 <div id="editModal" class="modal-overlay">
     <div class="modal-box">
         <h3>Edit Item</h3>
-        <input type="text" id="editItemName">
-        <input type="number" id="editItemPrice">
+        <input type="text" id="editItemName"><input type="number" id="editItemPrice">
         <div class="modal-btns">
             <button class="btn-cancel" onclick="closeEditModal()">Cancel</button>
             <button class="btn-confirm-edit" id="confirmUpdate">Save</button>
@@ -135,10 +129,7 @@
     <div class="modal-box">
         <h3>Delete?</h3>
         <p>Kya aap waqai is entry ko khatam karna chahte hain?</p>
-        <div class="modal-btns">
-            <button class="btn-cancel" onclick="closeDelModal()">Nahi</button>
-            <button class="btn-confirm-del" id="confirmDelete">Haan, Delete</button>
-        </div>
+        <div class="modal-btns"><button class="btn-cancel" onclick="closeDelModal()">Nahi</button><button class="btn-confirm-del" id="confirmDelete">Haan, Delete</button></div>
     </div>
 </div>
 
@@ -168,8 +159,8 @@
   });
 
   window.handleLogin = async () => {
-    const email = document.getElementById('loginEmail').value, pass = document.getElementById('loginPassword').value;
-    try { await signInWithEmailAndPassword(auth, email, pass); } catch (e) { alert("Login Fail!"); }
+    const e = document.getElementById('loginEmail').value, p = document.getElementById('loginPassword').value;
+    try { await signInWithEmailAndPassword(auth, e, p); } catch { alert("Login Fail!"); }
   };
   window.handleLogout = () => signOut(auth);
 
@@ -188,13 +179,12 @@
         snap.forEach(ds => {
           const d = ds.data();
           if((d.monthLabel || "Mar 2026") === monthSelector.value) {
-            allEntries.push({...d}); // Store for Full PDF Report
+            allEntries.push({...d});
             if(d.user === u) {
                 ut += Number(d.price);
                 const currentLabel = getDateLabel(d.time);
                 if (currentLabel !== lastLabel) { cont.innerHTML += `<div class="date-separator"><span>${currentLabel}</span></div>`; lastLabel = currentLabel; }
-                const timeStr = new Date(d.time).toLocaleString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-                cont.innerHTML += `<li><div class="item-info"><span class="item-name">${d.item}</span><span class="item-time">${timeStr}</span></div><div class="item-amount">SAR ${d.price}</div><div class="action-btns">${(u === currentUserRole) ? `<button class="edit-text" onclick="openEditModal('${ds.id}', '${d.item}', ${d.price})">Edit</button><button class="delete-text" onclick="openDelModal('${ds.id}')">Delete</button>` : ''}</div></li>`;
+                cont.innerHTML += `<li><div class="item-info"><span class="item-name">${d.item}</span><span class="item-time">${new Date(d.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span></div><div class="item-amount">SAR ${d.price}</div><div class="action-btns">${(u === currentUserRole) ? `<button class="edit-text" onclick="openEditModal('${ds.id}', '${d.item}', ${d.price})">Edit</button><button class="delete-text" onclick="openDelModal('${ds.id}')">Delete</button>` : ''}</div></li>`;
             }
           }
         });
@@ -204,67 +194,56 @@
     });
   };
 
-  function getDateLabel(t) {
-    const d = new Date(t), today = new Date(), yesterday = new Date(); yesterday.setDate(today.getDate() - 1);
-    if (d.toDateString() === today.toDateString()) return "Today";
-    if (d.toDateString() === yesterday.toDateString()) return "Yesterday";
-    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-  }
+  function getDateLabel(t) { const d = new Date(t), now = new Date(); if(d.toDateString()===now.toDateString()) return "Today"; return d.toLocaleDateString('en-GB', {day:'2-digit', month:'short'}); }
 
   window.addItem = async (u) => {
     const i = document.getElementById(`item${u}`).value, p = document.getElementById(`price${u}`).value;
     if(i && p) { await addDoc(colRef, { user: u, item: i, price: Number(p), time: Date.now(), monthLabel: monthSelector.value }); document.getElementById(`item${u}`).value = ""; document.getElementById(`price${u}`).value = ""; }
   };
 
-  // FULL MONTH PDF REPORT LOGIC
   window.downloadFullReport = async () => {
-    if(allEntries.length === 0) { alert("Is mahine ka koi data nahi hai!"); return; }
+    if(allEntries.length === 0) return;
     document.getElementById('loaderOverlay').style.display = 'flex';
+    const { jsPDF } = window.jspdf; const docPdf = new jsPDF();
     
-    const { jsPDF } = window.jspdf; 
-    const docPdf = new jsPDF();
+    docPdf.setFontSize(18); docPdf.setTextColor(7, 94, 84);
+    docPdf.text(`Kitchen Expense Report - ${monthSelector.value}`, 14, 20);
     
-    docPdf.setFontSize(18);
-    docPdf.setTextColor(7, 94, 84);
-    docPdf.text(`Kitchen Monthly Report - ${monthSelector.value}`, 14, 20);
-    
-    docPdf.setFontSize(10);
-    docPdf.setTextColor(100);
-    docPdf.text(`Generated on: ${new Date().toLocaleString()}`, 14, 28);
+    let currentY = 30;
+    const users = ['Haseeb', 'Arsalan', 'Aftab'];
 
-    // Sort entries by User then by Date
-    const sorted = allEntries.sort((a,b) => a.user.localeCompare(b.user));
-    const bodyRows = sorted.map(d => [
-        new Date(d.time).toLocaleDateString('en-GB'),
-        d.user.toUpperCase(),
-        d.item,
-        `SAR ${d.price}`
-    ]);
-
-    docPdf.autoTable({
-      head: [['Date', 'User', 'Item Name', 'Amount']],
-      body: bodyRows,
-      startY: 35,
-      theme: 'grid',
-      headStyles: { fillColor: [7, 94, 84] },
-      styles: { fontSize: 9 }
+    users.forEach(u => {
+      const userItems = allEntries.filter(d => d.user === u).sort((a,b) => a.time - b.time);
+      if(userItems.length > 0) {
+        docPdf.setFontSize(14); docPdf.setTextColor(0);
+        docPdf.text(`${u.toUpperCase()} LIST:`, 14, currentY + 5);
+        
+        const rows = userItems.map(d => [new Date(d.time).toLocaleDateString('en-GB'), d.item, `SAR ${d.price}`]);
+        const userTotal = userItems.reduce((s, d) => s + d.price, 0);
+        
+        docPdf.autoTable({
+          head: [['Date', 'Item', 'Amount']],
+          body: rows,
+          startY: currentY + 8,
+          theme: 'grid',
+          headStyles: { fillColor: [7, 94, 84] },
+          foot: [['', 'TOTAL', `SAR ${userTotal}`]],
+          footStyles: { fillColor: [220, 248, 198], textColor: [0], fontStyle: 'bold' }
+        });
+        currentY = docPdf.lastAutoTable.finalY + 10;
+      }
     });
 
-    const finalY = docPdf.lastAutoTable.finalY + 10;
-    docPdf.setFontSize(14);
-    docPdf.setTextColor(0);
-    docPdf.text(`GRAND TOTAL: SAR ${document.getElementById('grandTotal').innerText}`, 14, finalY);
+    docPdf.setFontSize(16); docPdf.setTextColor(7, 94, 84);
+    docPdf.text(`GRAND TOTAL: SAR ${document.getElementById('grandTotal').innerText}`, 14, currentY + 5);
 
     setTimeout(() => {
-        docPdf.save(`Kitchen_Full_Report_${monthSelector.value}.pdf`);
+        docPdf.save(`Kitchen_Report_${monthSelector.value}.pdf`);
         document.getElementById('loaderOverlay').style.display = 'none';
-        showToast();
+        const x = document.getElementById("toast"); x.className = "show"; setTimeout(() => { x.className = ""; }, 3000);
     }, 1500);
   };
 
-  function showToast() { const x = document.getElementById("toast"); x.className = "show"; setTimeout(() => { x.className = x.className.replace("show", ""); }, 3000); }
-
-  // Dialog Modals Handlers
   window.openEditModal = (id, name, price) => { itemToEdit = id; document.getElementById('editItemName').value = name; document.getElementById('editItemPrice').value = price; document.getElementById('editModal').style.display = 'flex'; };
   window.closeEditModal = () => { document.getElementById('editModal').style.display = 'none'; };
   document.getElementById('confirmUpdate').onclick = async () => {
