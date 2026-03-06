@@ -19,24 +19,31 @@
         .content { display: none; padding: 12px; padding-bottom: 100px; }
         .content.active { display: block; }
         
-        /* Input Box Alignment */
         .input-card { background: white; padding: 15px; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .input-card input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 15px; }
         .save-btn { width: 100%; background: #25d366; color: white; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; }
 
         .user-total-info { background: #dcf8c6; padding: 12px; border-radius: 10px; text-align: center; font-weight: bold; margin-bottom: 15px; color: #075e54; border: 1px solid #c1e0a8; }
         
-        /* WhatsApp Date Separator Style */
         .date-separator { text-align: center; margin: 20px 0 10px; position: relative; }
         .date-separator span { background: #d1e9ff; color: #444; padding: 4px 12px; border-radius: 8px; font-size: 11px; font-weight: bold; text-transform: uppercase; box-shadow: 0 1px 1px rgba(0,0,0,0.1); }
 
-        /* List Alignment */
         li { background: white; padding: 12px; margin-bottom: 10px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; border-left: 6px solid #075e54; box-shadow: 0 2px 4px rgba(0,0,0,0.08); }
         .item-info { flex: 1; }
         .item-name { font-size: 16px; font-weight: bold; color: #333; display: block; }
         .item-time { font-size: 11px; color: #777; margin-top: 3px; }
         .item-amount { font-weight: bold; color: #075e54; font-size: 15px; margin-right: 15px; }
         .del-btn { background: none; border: none; cursor: pointer; font-size: 18px; }
+
+        /* Modern Delete Modal */
+        #deleteModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
+        .modal-box { background: white; padding: 25px; border-radius: 20px; width: 80%; max-width: 300px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: popIn 0.3s ease; }
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .modal-box h3 { margin: 0 0 10px; color: #333; }
+        .modal-box p { color: #666; font-size: 14px; margin-bottom: 25px; }
+        .modal-btns { display: flex; gap: 10px; }
+        .btn-cancel { flex: 1; padding: 12px; border-radius: 10px; background: #f0f0f0; border: none; font-weight: bold; color: #555; }
+        .btn-confirm { flex: 1; padding: 12px; border-radius: 10px; background: #e53935; color: white; border: none; font-weight: bold; }
 
         .footer-fixed { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 15px; text-align: center; border-top: 1px solid #ddd; font-weight: bold; z-index: 100; font-size: 16px; }
     </style>
@@ -54,7 +61,7 @@
 
 <div id="mainApp">
     <div class="header">
-        <h1 style="font-size: 18px; margin: 0;">Kitchen Hisab 🥘</h1>
+        <h1 style="font-size: 18px; margin: 0;">Hi<span id="headerUserName"></span> 🥘</h1>
         <div style="display: flex; gap: 8px;">
             <select id="monthFilter" onchange="filterData()" style="padding: 5px; border-radius: 5px; border: none; font-size: 12px;"></select>
             <button onclick="handleLogout()" style="background: #e53935; color: white; border: none; padding: 5px 10px; border-radius: 5px; font-weight: bold; font-size: 11px;">Logout</button>
@@ -100,6 +107,17 @@
     <div class="footer-fixed">GRAND TOTAL: SAR <span id="grandTotal">0</span></div>
 </div>
 
+<div id="deleteModal">
+    <div class="modal-box">
+        <h3>Delete?</h3>
+        <p>Kya aap waqai is entry ko khatam karna chahte hain?</p>
+        <div class="modal-btns">
+            <button class="btn-cancel" onclick="closeDelModal()">Nahi</button>
+            <button class="btn-confirm" id="confirmDelete">Haan, Delete</button>
+        </div>
+    </div>
+</div>
+
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -118,20 +136,20 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
 
-  // PURANI LIST SHOW KARNE KE LIYE (OFFLINE MODE)
-  enableIndexedDbPersistence(db).catch((err) => console.log("Persistence error", err.code));
+  enableIndexedDbPersistence(db).catch(() => {});
 
   const colRef = collection(db, "kitchenExpenses");
   const userEmails = { "haseebnazar.malik@gmail.com": "Haseeb", "haseebnazar.one@gmail.com": "Arsalan", "haseebnazar.two@gmail.com": "Aftab" };
   let currentUserRole = "";
+  let itemToDelete = null;
 
   onAuthStateChanged(auth, (user) => {
     if (user) {
       currentUserRole = userEmails[user.email] || "Viewer";
+      document.getElementById('headerUserName').innerText = `, ${currentUserRole}`;
       document.getElementById('loginPage').style.display = 'none';
       document.getElementById('mainApp').style.display = 'block';
-      const myTab = document.getElementById(`tab${currentUserRole}`);
-      if(myTab) myTab.click();
+      document.getElementById(`tab${currentUserRole}`)?.click();
       ['Haseeb', 'Arsalan', 'Aftab'].forEach(u => {
           document.getElementById(`input${u}`).style.display = (u === currentUserRole) ? "block" : "none";
       });
@@ -155,19 +173,12 @@
       const opt = document.createElement('option'); opt.value = m; opt.text = m; monthSelector.appendChild(opt);
   }
 
-  // WHATSAPP STYLE DATE HEADER LOGIC
   function getDateLabel(timestamp) {
-    const d = new Date(timestamp);
-    const today = new Date();
-    const yesterday = new Date(); yesterday.setDate(today.getDate() - 1);
-
+    const d = new Date(timestamp); const today = new Date(); const yesterday = new Date(); yesterday.setDate(today.getDate() - 1);
     if (d.toDateString() === today.toDateString()) return "Today";
     if (d.toDateString() === yesterday.toDateString()) return "Yesterday";
-    
     const diffDays = Math.floor((today - d) / (1000 * 60 * 60 * 24));
-    if (diffDays < 7) return d.toLocaleString('en-US', { weekday: 'long' });
-    
-    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    return diffDays < 7 ? d.toLocaleString('en-US', { weekday: 'long' }) : d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
   }
 
   window.filterData = () => {
@@ -177,19 +188,12 @@
         const cont = document.getElementById(`list${u}`);
         let ut = 0; cont.innerHTML = "";
         let lastLabel = "";
-
         snap.forEach(ds => {
           const d = ds.data();
           if(d.user === u && (d.monthLabel || "Mar 2026") === monthSelector.value) {
             ut += Number(d.price);
-            
-            // Add Date Separator (Today, Yesterday etc)
             const currentLabel = getDateLabel(d.time);
-            if (currentLabel !== lastLabel) {
-              cont.innerHTML += `<div class="date-separator"><span>${currentLabel}</span></div>`;
-              lastLabel = currentLabel;
-            }
-
+            if (currentLabel !== lastLabel) { cont.innerHTML += `<div class="date-separator"><span>${currentLabel}</span></div>`; lastLabel = currentLabel; }
             const timeStr = new Date(d.time).toLocaleString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
             cont.innerHTML += `<li>
               <div class="item-info">
@@ -197,7 +201,7 @@
                   <span class="item-time">${timeStr}</span>
               </div>
               <div class="item-amount">SAR ${d.price}</div>
-              ${(u === currentUserRole) ? `<button class="del-btn" onclick="deleteItem('${ds.id}')">🗑️</button>` : ''}
+              ${(u === currentUserRole) ? `<button class="del-btn" onclick="openDelModal('${ds.id}')">🗑️</button>` : ''}
             </li>`;
           }
         });
@@ -215,7 +219,11 @@
     }
   };
 
-  window.deleteItem = async (id) => { if(confirm("Delete?")) await deleteDoc(doc(db, "kitchenExpenses", id)); };
+  window.openDelModal = (id) => { itemToDelete = id; document.getElementById('deleteModal').style.display = 'flex'; };
+  window.closeDelModal = () => { document.getElementById('deleteModal').style.display = 'none'; };
+  document.getElementById('confirmDelete').onclick = async () => {
+      if(itemToDelete) { await deleteDoc(doc(db, "kitchenExpenses", itemToDelete)); closeDelModal(); }
+  };
 
   window.openTab = (e, n) => {
     let c = document.getElementsByClassName("content"), t = document.getElementsByClassName("tab");
