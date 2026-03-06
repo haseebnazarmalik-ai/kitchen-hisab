@@ -34,15 +34,19 @@
         .item-time { font-size: 11px; color: #777; margin-top: 3px; }
         .item-amount { font-weight: bold; color: #075e54; font-size: 15px; margin-right: 10px; }
         
-        .action-btns { display: flex; gap: 5px; }
-        .edit-text { color: #25d366; font-weight: bold; font-size: 12px; cursor: pointer; border: none; background: none; }
-        .delete-text { color: #e53935; font-weight: bold; font-size: 12px; cursor: pointer; border: none; background: none; }
+        .action-btns { display: flex; gap: 8px; }
+        .edit-text { color: #25d366; font-weight: bold; font-size: 13px; cursor: pointer; border: none; background: none; }
+        .delete-text { color: #e53935; font-weight: bold; font-size: 13px; cursor: pointer; border: none; background: none; }
 
-        #deleteModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
-        .modal-box { background: white; padding: 25px; border-radius: 20px; width: 80%; max-width: 300px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        /* Modals (Edit & Delete) */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
+        .modal-box { background: white; padding: 25px; border-radius: 20px; width: 85%; max-width: 320px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .modal-box h3 { margin: 0 0 15px; color: #333; }
+        .modal-box input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
         .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
-        .btn-cancel { flex: 1; padding: 12px; border-radius: 10px; background: #f0f0f0; border: none; font-weight: bold; }
-        .btn-confirm { flex: 1; padding: 12px; border-radius: 10px; background: #e53935; color: white; border: none; font-weight: bold; }
+        .btn-cancel { flex: 1; padding: 12px; border-radius: 10px; background: #f0f0f0; border: none; font-weight: bold; color: #555; }
+        .btn-update { flex: 1; padding: 12px; border-radius: 10px; background: #25d366; color: white; border: none; font-weight: bold; }
+        .btn-delete { flex: 1; padding: 12px; border-radius: 10px; background: #e53935; color: white; border: none; font-weight: bold; }
 
         .footer-fixed { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 15px; text-align: center; border-top: 1px solid #ddd; font-weight: bold; z-index: 100; font-size: 16px; }
     </style>
@@ -77,7 +81,7 @@
         <div class="input-card" id="inputHaseeb">
             <input type="text" id="itemHaseeb" placeholder="Saman ka naam">
             <input type="number" id="priceHaseeb" placeholder="Amount">
-            <button class="save-btn" id="btnHaseeb" onclick="addItem('Haseeb')">SAVE</button>
+            <button class="save-btn" onclick="addItem('Haseeb')">SAVE</button>
         </div>
         <div class="user-total-info">Total: SAR <span id="totalHaseeb">0</span></div>
         <div id="listHaseeb"></div>
@@ -87,7 +91,7 @@
         <div class="input-card" id="inputArsalan">
             <input type="text" id="itemArsalan" placeholder="Saman ka naam">
             <input type="number" id="priceArsalan" placeholder="Amount">
-            <button class="save-btn" id="btnArsalan" onclick="addItem('Arsalan')">SAVE</button>
+            <button class="save-btn" onclick="addItem('Arsalan')">SAVE</button>
         </div>
         <div class="user-total-info">Total: SAR <span id="totalArsalan">0</span></div>
         <div id="listArsalan"></div>
@@ -97,7 +101,7 @@
         <div class="input-card" id="inputAftab">
             <input type="text" id="itemAftab" placeholder="Saman ka naam">
             <input type="number" id="priceAftab" placeholder="Amount">
-            <button class="save-btn" id="btnAftab" onclick="addItem('Aftab')">SAVE</button>
+            <button class="save-btn" onclick="addItem('Aftab')">SAVE</button>
         </div>
         <div class="user-total-info">Total: SAR <span id="totalAftab">0</span></div>
         <div id="listAftab"></div>
@@ -106,13 +110,25 @@
     <div class="footer-fixed">GRAND TOTAL: SAR <span id="grandTotal">0</span></div>
 </div>
 
-<div id="deleteModal">
+<div id="editModal" class="modal-overlay">
+    <div class="modal-box">
+        <h3>Edit Item</h3>
+        <input type="text" id="editItemName" placeholder="Saman ka naam">
+        <input type="number" id="editItemPrice" placeholder="Amount">
+        <div class="modal-btns">
+            <button class="btn-cancel" onclick="closeEditModal()">Cancel</button>
+            <button class="btn-update" id="confirmUpdate">Update</button>
+        </div>
+    </div>
+</div>
+
+<div id="deleteModal" class="modal-overlay">
     <div class="modal-box">
         <h3>Delete?</h3>
         <p>Kya aap waqai is entry ko khatam karna chahte hain?</p>
         <div class="modal-btns">
             <button class="btn-cancel" onclick="closeDelModal()">Nahi</button>
-            <button class="btn-confirm" id="confirmDelete">Haan, Delete</button>
+            <button class="btn-delete" id="confirmDelete">Haan, Delete</button>
         </div>
     </div>
 </div>
@@ -141,7 +157,7 @@
   const userEmails = { "haseebnazar.malik@gmail.com": "Haseeb", "haseebnazar.one@gmail.com": "Arsalan", "haseebnazar.two@gmail.com": "Aftab" };
   let currentUserRole = "";
   let itemToDelete = null;
-  let editModeId = null;
+  let itemToEdit = null;
 
   onAuthStateChanged(auth, (user) => {
     if (user) {
@@ -149,6 +165,10 @@
       document.getElementById('headerUserName').innerText = `, ${currentUserRole}`;
       document.getElementById('loginPage').style.display = 'none';
       document.getElementById('mainApp').style.display = 'block';
+      
+      // LOGOUT LOGIC: Only show for Haseeb's Email
+      document.getElementById('logoutBtn').style.display = (user.email === "haseebnazar.malik@gmail.com") ? "block" : "none";
+      
       document.getElementById(`tab${currentUserRole}`)?.click();
       ['Haseeb', 'Arsalan', 'Aftab'].forEach(u => {
           document.getElementById(`input${u}`).style.display = (u === currentUserRole) ? "block" : "none";
@@ -203,7 +223,7 @@
               <div class="item-amount">SAR ${d.price}</div>
               <div class="action-btns">
                 ${(u === currentUserRole) ? `
-                  <button class="edit-text" onclick="startEdit('${ds.id}', '${d.item}', ${d.price}, '${u}')">Edit</button>
+                  <button class="edit-text" onclick="openEditModal('${ds.id}', '${d.item}', ${d.price})">Edit</button>
                   <button class="delete-text" onclick="openDelModal('${ds.id}')">Delete</button>
                 ` : ''}
               </div>
@@ -219,32 +239,37 @@
   window.addItem = async (u) => {
     const i = document.getElementById(`item${u}`).value, p = document.getElementById(`price${u}`).value;
     if(i && p) {
-      if(editModeId) {
-        await updateDoc(doc(db, "kitchenExpenses", editModeId), { item: i, price: Number(p) });
-        editModeId = null;
-        document.getElementById(`btn${u}`).innerText = "SAVE";
-      } else {
-        await addDoc(colRef, { user: u, item: i, price: Number(p), time: Date.now(), monthLabel: monthSelector.value });
-      }
+      await addDoc(colRef, { user: u, item: i, price: Number(p), time: Date.now(), monthLabel: monthSelector.value });
       document.getElementById(`item${u}`).value = ""; document.getElementById(`price${u}`).value = "";
     }
   };
 
-  window.startEdit = (id, item, price, u) => {
-    editModeId = id;
-    document.getElementById(`item${u}`).value = item;
-    document.getElementById(`price${u}`).value = price;
-    document.getElementById(`btn${u}`).innerText = "UPDATE";
-    window.scrollTo(0,0);
+  // EDIT MODAL LOGIC
+  window.openEditModal = (id, name, price) => {
+    itemToEdit = id;
+    document.getElementById('editItemName').value = name;
+    document.getElementById('editItemPrice').value = price;
+    document.getElementById('editModal').style.display = 'flex';
+  };
+  window.closeEditModal = () => { document.getElementById('editModal').style.display = 'none'; };
+  document.getElementById('confirmUpdate').onclick = async () => {
+    const newName = document.getElementById('editItemName').value;
+    const newPrice = document.getElementById('editItemPrice').value;
+    if(itemToEdit && newName && newPrice) {
+      const id = itemToEdit;
+      closeEditModal();
+      await updateDoc(doc(db, "kitchenExpenses", id), { item: newName, price: Number(newPrice) });
+    }
   };
 
+  // DELETE MODAL LOGIC
   window.openDelModal = (id) => { itemToDelete = id; document.getElementById('deleteModal').style.display = 'flex'; };
   window.closeDelModal = () => { document.getElementById('deleteModal').style.display = 'none'; };
   document.getElementById('confirmDelete').onclick = async () => {
       if(itemToDelete) { 
           const id = itemToDelete;
-          itemToDelete = null; // Pehle clear karein
-          closeDelModal(); // Foran band karein
+          itemToDelete = null;
+          closeDelModal();
           await deleteDoc(doc(db, "kitchenExpenses", id)); 
       }
   };
@@ -253,9 +278,6 @@
     let c = document.getElementsByClassName("content"), t = document.getElementsByClassName("tab");
     for (let i=0; i<c.length; i++) { c[i].classList.remove("active"); t[i].classList.remove("active"); }
     document.getElementById(n).classList.add("active"); e.currentTarget.classList.add("active");
-    
-    // Logout button logic: Sirf Haseeb ke tab par dikhega
-    document.getElementById('logoutBtn').style.display = (n === 'Haseeb') ? 'block' : 'none';
   };
 </script>
 </body>
