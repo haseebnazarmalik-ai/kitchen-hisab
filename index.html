@@ -62,7 +62,7 @@
 
 <div id="loginPage">
     <div class="login-card">
-        <h2 style="color:#075e54; margin-top:0;">Kitchen Login</h2>
+        <h2 style="color:#075e54; margin-top:0;">Login</h2>
         <input type="email" id="loginEmail" placeholder="Email Address">
         <input type="password" id="loginPassword" placeholder="Password">
         <button class="save-btn" onclick="handleLogin()">Login</button>
@@ -124,7 +124,7 @@
 </div>
 
 <script type="module">
-  // Register Service Worker for Installation
+  // Service Worker for Installation
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       const swCode = "self.addEventListener('install', e => self.skipWaiting()); self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));";
@@ -141,7 +141,14 @@
   const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app);
   enableIndexedDbPersistence(db).catch(() => {});
   const colRef = collection(db, "kitchenExpenses");
-  const userEmails = { "haseebnazar.malik@gmail.com": "Haseeb", "haseebnazar.one@gmail.com": "Arsalan", "haseebnazar.two@gmail.com": "Aftab" };
+
+  // Updated Emails as requested
+  const userEmails = { 
+    "haseebnazar.malik@gmail.com": "Haseeb", 
+    "arsalan@gmail.com": "Arsalan", 
+    "aftab@gmail.com": "Aftab" 
+  };
+
   let currentUserRole = "", itemToDelete = null, itemToEdit = null;
   let allEntries = [];
 
