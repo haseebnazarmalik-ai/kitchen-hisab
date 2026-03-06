@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kitchen Tracker Pro</title>
+    <title>Kitchen Tracker Pro - History Edition</title>
     
     <meta name="theme-color" content="#075e54">
     <link rel="manifest" id="manifest-placeholder">
@@ -12,8 +12,17 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     
     <style>
-        body { font-family: 'Segoe UI', Roboto, sans-serif; background: #e5ddd5; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Roboto, sans-serif; background: #e5ddd5; margin: 0; padding: 0; overflow-x: hidden; }
+        
+        /* --- NAVIGATION SIDEBAR STYLE --- */
+        .sidenav { height: 100%; width: 0; position: fixed; z-index: 2000; top: 0; left: 0; background-color: white; overflow-x: hidden; transition: 0.3s; padding-top: 60px; box-shadow: 2px 0 10px rgba(0,0,0,0.2); }
+        .sidenav a { padding: 15px 25px; text-decoration: none; font-size: 18px; color: #333; display: block; transition: 0.2s; border-bottom: 1px solid #eee; }
+        .sidenav a:hover { background-color: #f1f1f1; }
+        .sidenav .closebtn { position: absolute; top: 10px; right: 20px; font-size: 30px; cursor: pointer; color: #075e54; }
+        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1500; }
+
         .header { background: #075e54; color: white; padding: 12px 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); position: sticky; top: 0; z-index: 100; display: flex; align-items: center; gap: 10px; }
+        .menu-icon { font-size: 24px; cursor: pointer; padding-right: 10px; }
         .header h1 { margin: 0; font-size: 16px; flex-grow: 1; }
         #monthFilter { background: #128c7e; color: white; border: 1px solid #fff; padding: 5px; border-radius: 5px; font-size: 12px; outline: none; }
         .download-btn { background: #25d366; color: white; border: none; padding: 8px 12px; border-radius: 5px; font-weight: bold; font-size: 11px; cursor: pointer; }
@@ -25,50 +34,60 @@
         .content { display: none; padding: 15px; padding-bottom: 110px; }
         .content.active { display: block; }
         
+        /* Input & List Styles */
         .input-card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 15px; }
         .input-row { display: flex; flex-direction: column; gap: 10px; }
         .input-row input { padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; outline: none; }
         .add-btn { background: #25d366; color: white; border: none; padding: 14px; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; }
 
-        .date-separator { text-align: center; margin: 20px 0 10px; }
-        .date-separator span { background: #d1e4fc; color: #444; padding: 4px 12px; border-radius: 8px; font-size: 10px; font-weight: bold; }
-
         ul { list-style: none; padding: 0; margin: 0; }
         li { background: white; padding: 10px; margin-bottom: 8px; border-radius: 10px; display: flex; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-left: 5px solid #075e54; }
-        .item-info { display: flex; flex-grow: 1; align-items: center; margin-right: 5px; overflow: hidden; }
-        .item-name { font-weight: 500; color: #333; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 14px; }
-        .item-price { font-weight: 700; color: #075e54; width: 75px; text-align: right; margin-right: 10px; font-size: 14px; }
-        .item-time { font-size: 9px; color: #888; width: 50px; text-align: right; margin-right: 5px; }
-        
+        .item-info { display: flex; flex-grow: 1; align-items: center; overflow: hidden; }
+        .item-name { font-weight: 500; flex: 1; font-size: 14px; }
+        .item-price { font-weight: 700; color: #075e54; width: 75px; text-align: right; font-size: 14px; margin-right: 10px; }
         .btn-group { display: flex; gap: 5px; }
-        .edit-btn { color: #34b7f1; border: 1px solid #d1f0ff; background: #f0faff; border-radius: 6px; padding: 5px 8px; cursor: pointer; font-size: 10px; }
-        .del-btn { color: #ff5252; border: 1px solid #ffcccc; background: #fff5f5; border-radius: 6px; padding: 5px 8px; cursor: pointer; font-size: 10px; }
-
-        /* Modern Dialogs */
-        .modal, #confirmDialog { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
-        .modal-content, .dialog-content { background: white; padding: 20px; border-radius: 15px; width: 85%; max-width: 350px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); text-align: center; }
-        .modal-content h3 { margin-top: 0; color: #075e54; }
-        .modal-content input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        .modal-btns, .dialog-btns { display: flex; gap: 10px; margin-top: 15px; }
-        .modal-btns button, .dialog-btns button { flex: 1; padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
-        .save-edit, .confirm-yes { background: #075e54; color: white; }
-        .cancel-edit, .confirm-no { background: #eee; color: #333; }
-        .confirm-yes { background: #ff5252; }
-
+        .edit-btn, .del-btn { border-radius: 6px; padding: 5px 8px; cursor: pointer; font-size: 10px; border: 1px solid #ddd; }
+        
+        /* Modals & Dialogs */
+        .modal { display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); align-items: center; justify-content: center; }
+        .modal-content { background: white; padding: 20px; border-radius: 15px; width: 90%; max-width: 400px; max-height: 80vh; overflow-y: auto; }
+        
         .user-total-info { background: #dcf8c6; padding: 10px; border-radius: 8px; font-weight: bold; text-align: center; color: #075e54; margin-bottom: 15px; border: 1px solid #c5e1a5; }
         .footer-fixed { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 15px; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); text-align: center; z-index: 1000; }
+        
+        .history-item { font-size: 12px; border-bottom: 1px dashed #ccc; padding: 8px 0; text-align: left; }
     </style>
 </head>
 <body>
 
-<div id="confirmDialog">
-    <div class="dialog-content">
+<div id="mySidenav" class="sidenav">
+    <span class="closebtn" onclick="closeNav()">&times;</span>
+    <div style="padding: 20px; font-weight: bold; color: #075e54; border-bottom: 2px solid #075e54;">MENU</div>
+    <a href="#" onclick="showHistory()">🗑️ Delete History</a>
+    <a href="#" onclick="alert('Setting feature coming with login system!')">⚙️ Settings</a>
+</div>
+<div id="sidebarOverlay" class="sidebar-overlay" onclick="closeNav()"></div>
+
+<div id="historyModal" class="modal">
+    <div class="modal-content">
+        <h3 style="color:#075e54">Delete History (30 Days)</h3>
+        <p style="font-size:11px; color:red;">Items auto-delete after 30 days.</p>
+        <div id="historyList"></div>
+        <div class="modal-btns">
+            <button onclick="closeHistory()" class="cancel-edit" style="background:#eee; padding:10px; border-radius:5px; flex:1; border:none;">Close</button>
+            <button onclick="clearHistoryManually()" style="background:#ff5252; color:white; padding:10px; border-radius:5px; flex:1; border:none;">Clear All</button>
+        </div>
+    </div>
+</div>
+
+<div id="confirmDialog" class="modal">
+    <div class="modal-content" style="text-align:center;">
         <div style="font-size: 40px;">⚠️</div>
-        <h3 style="margin:10px 0;">Warning ⚠️</h3>
-        <p>Are you sure to delete "<span id="confirmItemName" style="font-weight:bold; color:#ff5252;"></span>"?</p>
-        <div class="dialog-btns">
-            <button class="confirm-no" onclick="closeConfirmDialog()">Cancel</button>
-            <button class="confirm-yes" id="confirmDeleteBtn">Delete</button>
+        <h3>Warning ⚠️</h3>
+        <p>Are you sure to delete "<span id="confirmItemName" style="color:red; font-weight:bold;"></span>"?</p>
+        <div class="modal-btns" style="display:flex; gap:10px;">
+            <button onclick="closeConfirmDialog()" style="flex:1; padding:10px; border:none; border-radius:5px;">Cancel</button>
+            <button id="confirmDeleteBtn" style="flex:1; background:#ff5252; color:white; padding:10px; border:none; border-radius:5px;">Delete</button>
         </div>
     </div>
 </div>
@@ -76,16 +95,15 @@
 <div id="editModal" class="modal">
     <div class="modal-content">
         <h3>Edit Item</h3>
-        <input type="text" id="editItemName" placeholder="Saman ka naam">
-        <input type="number" id="editItemAmount" placeholder="Amount">
-        <div class="modal-btns">
-            <button class="cancel-edit" onclick="closeEditModal()">Cancel</button>
-            <button class="save-edit" onclick="saveEdit()">Update</button>
-        </div>
+        <input type="text" id="editItemName" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:5px;">
+        <input type="number" id="editItemAmount" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:5px;">
+        <button onclick="saveEdit()" style="width:100%; background:#075e54; color:white; padding:10px; border:none; border-radius:5px; font-weight:bold;">Update</button>
+        <button onclick="closeEditModal()" style="width:100%; background:none; color:grey; border:none; margin-top:10px;">Cancel</button>
     </div>
 </div>
 
 <div class="header">
+    <span class="menu-icon" onclick="openNav()">&#9776;</span>
     <h1>Kitchen Hisab 🥘</h1>
     <select id="monthFilter" onchange="filterData()"></select>
     <button class="download-btn" onclick="generatePDF()">PDF</button>
@@ -98,38 +116,21 @@
 </div>
 
 <div id="Haseeb" class="content active">
-    <div class="input-card"><div class="input-row">
-        <input type="text" id="itemHaseeb" placeholder="Saman ka naam">
-        <input type="number" id="priceHaseeb" placeholder="Amount">
-        <button class="add-btn" onclick="addItem('Haseeb')">SAVE</button>
-    </div></div>
+    <div class="input-card"><div class="input-row"><input type="text" id="itemHaseeb" placeholder="Saman ka naam"><input type="number" id="priceHaseeb" placeholder="Amount"><button class="add-btn" onclick="addItem('Haseeb')">SAVE</button></div></div>
     <div class="user-total-info">Total: SAR <span id="totalHaseeb">0</span></div>
     <div id="listHaseeb"></div>
 </div>
 
 <div id="Arsalan" class="content"><div class="input-card"><div class="input-row"><input type="text" id="itemArsalan" placeholder="Saman ka naam"><input type="number" id="priceArsalan" placeholder="Amount"><button class="add-btn" onclick="addItem('Arsalan')">SAVE</button></div></div><div class="user-total-info">Total: SAR <span id="totalArsalan">0</span></div><div id="listArsalan"></div></div>
+
 <div id="Aftab" class="content"><div class="input-card"><div class="input-row"><input type="text" id="itemAftab" placeholder="Saman ka naam"><input type="number" id="priceAftab" placeholder="Amount"><button class="add-btn" onclick="addItem('Aftab')">SAVE</button></div></div><div class="user-total-info">Total: SAR <span id="totalAftab">0</span></div><div id="listAftab"></div></div>
 
 <div class="footer-fixed"><b style="color:#075e54">GRAND TOTAL: SAR <span id="grandTotal">0</span></b></div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, query, orderBy, getDocs, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, query, orderBy, getDocs, where, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-  // --- GitHub Pages Optimized PWA Setup ---
-  const manifest = {
-    "name": "Kitchen Tracker Pro",
-    "short_name": "KitchenHisab",
-    "start_url": "/kitchen-hisab/", 
-    "display": "standalone",
-    "background_color": "#e5ddd5",
-    "theme_color": "#075e54",
-    "icons": [{"src": "https://cdn-icons-png.flaticon.com/512/3595/3595455.png", "sizes": "512x512", "type": "image/png"}]
-  };
-  const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
-  document.querySelector('#manifest-placeholder').setAttribute('href', URL.createObjectURL(blob));
-
-  // --- Firebase Setup ---
   const firebaseConfig = {
     apiKey: "AIzaSyAywmVNaLkyudJelZ-Gdx6gL1hydzxe2cg",
     authDomain: "haseeb-984fc.firebaseapp.com",
@@ -141,90 +142,124 @@
 
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
-  enableIndexedDbPersistence(db).catch(() => {});
   const colRef = collection(db, "kitchenExpenses");
+  const historyRef = collection(db, "deletedExpenses");
 
-  let currentEditId = null;
+  // --- Sidebar & Navigation Logic ---
+  window.openNav = () => { document.getElementById("mySidenav").style.width = "250px"; document.getElementById("sidebarOverlay").style.display = "block"; };
+  window.closeNav = () => { document.getElementById("mySidenav").style.width = "0"; document.getElementById("sidebarOverlay").style.display = "none"; };
+
+  // --- History Logic (30 Days Auto Clear) ---
+  window.showHistory = async () => {
+      closeNav();
+      const list = document.getElementById('historyList');
+      list.innerHTML = "Loading...";
+      document.getElementById('historyModal').style.display = 'flex';
+      
+      const q = query(historyRef, orderBy("deleteTime", "desc"));
+      const snap = await getDocs(q);
+      list.innerHTML = "";
+      const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+
+      snap.forEach(async (d) => {
+          const data = d.data();
+          if(data.deleteTime < thirtyDaysAgo) {
+              await deleteDoc(doc(db, "deletedExpenses", d.id)); // Auto delete
+          } else {
+              const date = new Date(data.deleteTime).toLocaleDateString();
+              list.innerHTML += `<div class="history-item"><b>${data.user}</b>: ${data.item} - SAR ${data.price} <br><small>Deleted on: ${date}</small></div>`;
+          }
+      });
+      if(list.innerHTML === "") list.innerHTML = "No history found.";
+  };
+
+  window.closeHistory = () => { document.getElementById('historyModal').style.display = 'none'; };
+
+  window.clearHistoryManually = async () => {
+      if(confirm("Sari history khatam kar dein?")) {
+          const snap = await getDocs(historyRef);
+          const batch = writeBatch(db);
+          snap.forEach(d => batch.delete(d.ref));
+          await batch.commit();
+          showHistory();
+      }
+  };
+
+  // --- Main App Functionality ---
   let currentDeleteId = null;
+  let currentDeleteItemData = null;
 
-  // Modals Logic
-  window.openConfirmDialog = (id, itemName) => {
+  window.openConfirmDialog = (id, itemName, user, price) => {
       currentDeleteId = id;
+      currentDeleteItemData = { item: itemName, user, price, deleteTime: Date.now() };
       document.getElementById('confirmItemName').innerText = itemName;
       document.getElementById('confirmDialog').style.display = 'flex';
   };
   window.closeConfirmDialog = () => { document.getElementById('confirmDialog').style.display = 'none'; };
+
   document.getElementById('confirmDeleteBtn').onclick = async () => {
-      if (currentDeleteId) { await deleteDoc(doc(db, "kitchenExpenses", currentDeleteId)); closeConfirmDialog(); }
+      if (currentDeleteId) {
+          await addDoc(historyRef, currentDeleteItemData); // Move to history
+          await deleteDoc(doc(db, "kitchenExpenses", currentDeleteId));
+          closeConfirmDialog();
+      }
   };
 
-  window.openEditModal = (id, name, amount) => {
+  // ... (Edit logic remains same but adapted for SAR)
+  window.openEditModal = (id, n, a) => {
       currentEditId = id;
-      document.getElementById('editItemName').value = name;
-      document.getElementById('editItemAmount').value = amount;
+      document.getElementById('editItemName').value = n;
+      document.getElementById('editItemAmount').value = a;
       document.getElementById('editModal').style.display = 'flex';
   };
   window.closeEditModal = () => { document.getElementById('editModal').style.display = 'none'; };
   window.saveEdit = async () => {
       const n = document.getElementById('editItemName').value, a = document.getElementById('editItemAmount').value;
-      if (n && a && currentEditId) { await updateDoc(doc(db, "kitchenExpenses", currentEditId), { item: n, price: Number(a) }); closeEditModal(); }
+      await updateDoc(doc(db, "kitchenExpenses", currentEditId), { item: n, price: Number(a) });
+      closeEditModal();
   };
 
-  // Main Logic
+  // Filter & Snapshot
   const monthSelector = document.getElementById('monthFilter');
-  const getM = () => { const d = new Date(); return `${d.toLocaleString('default', { month: 'short' })} ${d.getFullYear()}`; };
-  for(let i=0; i<6; i++) {
-    const d = new Date(); d.setMonth(d.getMonth() - i);
+  for(let i=0; i<6; i++){
+    const d = new Date(); d.setMonth(d.getMonth()-i);
     const m = `${d.toLocaleString('default', { month: 'short' })} ${d.getFullYear()}`;
     const opt = document.createElement('option'); opt.value = m; opt.text = m; monthSelector.appendChild(opt);
   }
+
+  window.filterData = () => {
+      onSnapshot(query(colRef, orderBy("time", "desc")), (snap) => {
+          const users = ['Haseeb', 'Arsalan', 'Aftab'];
+          let gt = 0;
+          users.forEach(u => {
+              const cont = document.getElementById(`list${u}`);
+              let ut = 0; cont.innerHTML = "";
+              snap.forEach(ds => {
+                  const d = ds.data();
+                  if(d.user === u && (d.monthLabel || "Mar 2026") === monthSelector.value) {
+                      ut += Number(d.price);
+                      cont.innerHTML += `<li><div class="item-info"><span class="item-name">${d.item}</span><span class="item-price">SAR ${d.price}</span></div><div class="btn-group"><button class="edit-btn" onclick="openEditModal('${ds.id}','${d.item}',${d.price})">Edit</button><button class="del-btn" style="color:red;" onclick="openConfirmDialog('${ds.id}','${d.item}','${u}',${d.price})">DEL</button></div></li>`;
+                  }
+              });
+              document.getElementById(`total${u}`).innerText = ut; gt += ut;
+          });
+          document.getElementById('grandTotal').innerText = gt;
+      });
+  };
+
+  window.addItem = async (u) => {
+      const i = document.getElementById(`item${u}`).value, p = document.getElementById(`price${u}`).value;
+      if(i && p) {
+          await addDoc(colRef, { user: u, item: i, price: Number(p), time: Date.now(), monthLabel: monthSelector.value });
+          document.getElementById(`item${u}`).value = ""; document.getElementById(`price${u}`).value = "";
+      }
+  };
 
   window.openTab = (e, n) => {
     let c = document.getElementsByClassName("content"), t = document.getElementsByClassName("tab");
     for (let i=0; i<c.length; i++) c[i].classList.remove("active");
     for (let i=0; i<t.length; i++) t[i].classList.remove("active");
     document.getElementById(n).classList.add("active"); e.currentTarget.classList.add("active");
-  };
-
-  let unsub;
-  window.filterData = () => {
-    if (unsub) unsub();
-    unsub = onSnapshot(query(colRef, orderBy("time", "desc")), (snap) => {
-      const users = ['Haseeb', 'Arsalan', 'Aftab'];
-      let gTotal = 0;
-      users.forEach(u => {
-        const cont = document.getElementById(`list${u}`), totEl = document.getElementById(`total${u}`);
-        cont.innerHTML = ""; let uTotal = 0, lastD = "";
-        snap.forEach(ds => {
-          const d = ds.data();
-          if(d.user === u && (d.monthLabel || "Mar 2026") === monthSelector.value) {
-            uTotal += Number(d.price);
-            const dsStr = new Date(d.time).toLocaleDateString('en-GB', {day:'2-digit', month:'short'});
-            if(dsStr !== lastD) { cont.innerHTML += `<div class="date-separator"><span>${dsStr}</span></div>`; lastD = dsStr; }
-            cont.innerHTML += `<li><div class="item-info"><span class="item-name">${d.item}</span><span class="item-price">SAR ${d.price}</span><span class="item-time">${new Date(d.time).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</span></div><div class="btn-group"><button class="edit-btn" onclick="openEditModal('${ds.id}','${d.item}',${d.price})">EDIT</button><button class="del-btn" onclick="openConfirmDialog('${ds.id}','${d.item}')">DEL</button></div></li>`;
-          }
-        });
-        totEl.innerText = uTotal; gTotal += uTotal;
-      });
-      document.getElementById('grandTotal').innerText = gTotal;
-    });
-  };
-
-  window.addItem = async (u) => {
-    const i = document.getElementById(`item${u}`).value, p = document.getElementById(`price${u}`).value;
-    if(i && p) { await addDoc(colRef, { user: u, item: i, price: Number(p), time: Date.now(), monthLabel: getM() }); document.getElementById(`item${u}`).value=""; document.getElementById(`price${u}`).value=""; }
-  };
-
-  window.generatePDF = async () => {
-    const { jsPDF } = window.jspdf; const docP = new jsPDF();
-    const snap = await getDocs(query(colRef, orderBy("time", "asc")));
-    let y = 25; docP.text(`Kitchen Report - ${monthSelector.value}`, 14, 15);
-    ['Haseeb', 'Arsalan', 'Aftab'].forEach(u => {
-        const r = []; let t = 0;
-        snap.forEach(d => { const da = d.data(); if(da.user===u && (da.monthLabel||"Mar 2026")===monthSelector.value) { r.push([new Date(da.time).toLocaleDateString('en-GB'), da.item, `SAR ${da.price}`]); t+=Number(da.price); } });
-        if(r.length) { docP.text(u.toUpperCase(), 14, y); docP.autoTable({startY:y+2, head:[['Date','Item','Amount']], body:r}); y=docP.lastAutoTable.finalY+10; docP.text(`Total: SAR ${t}`, 140, y-5); }
-    });
-    docP.save(`Kitchen_${monthSelector.value}.pdf`);
   };
 
   filterData();
