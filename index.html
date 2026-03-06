@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kitchen Tracker Pro - Fast Edition</title>
+    <title>Kitchen Tracker Pro - Premium Design</title>
     
     <meta name="theme-color" content="#075e54">
     <link rel="manifest" id="manifest-placeholder">
@@ -14,7 +14,7 @@
     <style>
         body { font-family: 'Segoe UI', Roboto, sans-serif; background: #e5ddd5; margin: 0; padding: 0; overflow-x: hidden; }
         
-        /* --- NAVIGATION SIDEBAR --- */
+        /* --- SIDE NAVIGATION --- */
         .sidenav { height: 100%; width: 0; position: fixed; z-index: 2000; top: 0; left: 0; background-color: white; overflow-x: hidden; transition: 0.3s; padding-top: 60px; box-shadow: 2px 0 10px rgba(0,0,0,0.2); }
         .sidenav a { padding: 15px 25px; text-decoration: none; font-size: 18px; color: #333; display: block; border-bottom: 1px solid #eee; }
         .sidenav .closebtn { position: absolute; top: 10px; right: 20px; font-size: 30px; cursor: pointer; color: #075e54; }
@@ -42,21 +42,23 @@
         ul { list-style: none; padding: 0; margin: 0; }
         li { background: white; padding: 10px; margin-bottom: 8px; border-radius: 10px; display: flex; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-left: 5px solid #075e54; }
         .item-info { display: flex; flex-grow: 1; align-items: center; overflow: hidden; }
-        .item-name { font-weight: 500; flex: 1; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .item-name { font-weight: 500; flex: 1; font-size: 14px; }
         .item-price { font-weight: 700; color: #075e54; width: 80px; text-align: right; font-size: 14px; margin-right: 10px; }
         
         .btn-group { display: flex; gap: 5px; }
         .edit-btn, .del-btn { border-radius: 6px; padding: 5px 8px; cursor: pointer; font-size: 10px; border: 1px solid #ddd; background: #f9f9f9; }
         .del-btn { color: #ff5252; border-color: #ffcccc; }
 
-        /* Modals */
+        /* --- MODALS & DIALOGS --- */
         .modal { display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); align-items: center; justify-content: center; }
-        .modal-content { background: white; padding: 20px; border-radius: 15px; width: 85%; max-width: 380px; max-height: 80vh; overflow-y: auto; text-align: center; }
+        .modal-content { background: white; padding: 25px; border-radius: 15px; width: 85%; max-width: 380px; text-align: center; position: relative; }
         
         .user-total-info { background: #dcf8c6; padding: 10px; border-radius: 8px; font-weight: bold; text-align: center; color: #075e54; margin-bottom: 15px; border: 1px solid #c5e1a5; }
         .footer-fixed { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 15px; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); text-align: center; z-index: 1000; }
         
         .history-item { font-size: 12px; border-bottom: 1px dashed #ccc; padding: 8px 0; text-align: left; }
+        .btn-red { background: #ff5252; color: white; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; flex: 1; }
+        .btn-grey { background: #eee; color: #333; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; flex: 1; }
     </style>
 </head>
 <body>
@@ -70,13 +72,25 @@
 <div id="sidebarOverlay" class="sidebar-overlay" onclick="closeNav()"></div>
 
 <div id="historyModal" class="modal">
-    <div class="modal-content">
+    <div class="modal-content" style="max-height: 80vh; overflow-y: auto;">
         <h3 style="color:#075e54; margin-top:0;">Delete History</h3>
         <p style="font-size:10px; color:red;">Auto-clears after 30 days.</p>
-        <div id="historyList" style="margin-bottom: 15px;"></div>
+        <div id="historyList" style="margin-bottom: 20px;"></div>
         <div style="display:flex; gap:10px;">
-            <button onclick="closeHistory()" style="flex:1; padding:10px; border:none; border-radius:5px; background:#eee;">Close</button>
-            <button onclick="clearHistoryManually()" style="flex:1; padding:10px; border:none; border-radius:5px; background:#ff5252; color:white;">Clear All</button>
+            <button onclick="closeHistory()" class="btn-grey">Close</button>
+            <button onclick="openClearAllWarning()" class="btn-red">Clear All</button>
+        </div>
+    </div>
+</div>
+
+<div id="clearAllDialog" class="modal">
+    <div class="modal-content">
+        <div style="font-size: 50px;">🗑️</div>
+        <h3 style="margin: 10px 0;">Clear Entire History?</h3>
+        <p style="color: #666; font-size: 14px;">Kya aap waqai sari delete history khatam karna chahte hain? Ye wapis nahi ayegi.</p>
+        <div style="display:flex; gap:10px; margin-top:25px;">
+            <button onclick="closeClearAllWarning()" class="btn-grey">Cancel</button>
+            <button id="confirmClearAllBtn" class="btn-red">Yes, Clear All</button>
         </div>
     </div>
 </div>
@@ -86,9 +100,9 @@
         <div style="font-size: 40px;">⚠️</div>
         <h3>Confirm Delete?</h3>
         <p>Delete "<span id="confirmItemName" style="color:#ff5252; font-weight:bold;"></span>"?</p>
-        <div style="display:flex; gap:10px; margin-top:20px;">
-            <button onclick="closeConfirmDialog()" style="flex:1; padding:12px; border:none; border-radius:8px; background:#eee;">Cancel</button>
-            <button id="confirmDeleteBtn" style="flex:1; padding:12px; border:none; border-radius:8px; background:#ff5252; color:white; font-weight:bold;">Delete</button>
+        <div style="display:flex; gap:10px; margin-top:25px;">
+            <button onclick="closeConfirmDialog()" class="btn-grey">Cancel</button>
+            <button id="confirmDeleteBtn" class="btn-red">Delete</button>
         </div>
     </div>
 </div>
@@ -132,7 +146,7 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, query, orderBy, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-  // --- Manifest PWA Setup ---
+  // --- Manifest Setup ---
   const manifest = {
     "name": "Kitchen Tracker Pro",
     "short_name": "KitchenHisab",
@@ -163,7 +177,7 @@
   window.openNav = () => { document.getElementById("mySidenav").style.width = "260px"; document.getElementById("sidebarOverlay").style.display = "block"; };
   window.closeNav = () => { document.getElementById("mySidenav").style.width = "0"; document.getElementById("sidebarOverlay").style.display = "none"; };
 
-  // --- Fast Delete Logic & Multi-click Protection ---
+  // --- Fast Delete Logic ---
   let currentDeleteId = null;
   let currentDeleteData = null;
   let isDeleting = false;
@@ -174,31 +188,21 @@
       document.getElementById('confirmItemName').innerText = itemName;
       document.getElementById('confirmDialog').style.display = 'flex';
   };
-  window.closeConfirmDialog = () => { 
-      document.getElementById('confirmDialog').style.display = 'none'; 
-      isDeleting = false; 
-  };
+  window.closeConfirmDialog = () => { document.getElementById('confirmDialog').style.display = 'none'; isDeleting = false; };
 
   document.getElementById('confirmDeleteBtn').onclick = async () => {
       if (currentDeleteId && !isDeleting) {
           isDeleting = true;
-          document.getElementById('confirmDeleteBtn').disabled = true;
-          
-          // FAST UI: Fauran band karo
           closeConfirmDialog();
-          
           try {
-              // Background mein DB update
               await addDoc(historyRef, currentDeleteData);
               await deleteDoc(doc(db, "kitchenExpenses", currentDeleteId));
           } catch (e) { console.error(e); }
-          
-          document.getElementById('confirmDeleteBtn').disabled = false;
           currentDeleteId = null;
       }
   };
 
-  // --- History Management ---
+  // --- History Logic ---
   window.showHistory = async () => {
       closeNav();
       const list = document.getElementById('historyList');
@@ -221,34 +225,36 @@
       if(!list.innerHTML) list.innerHTML = "No recent history.";
   };
   window.closeHistory = () => { document.getElementById('historyModal').style.display = 'none'; };
-  window.clearHistoryManually = async () => {
-      if(confirm("Sari history clear kar dein?")) {
+
+  // --- Custom Clear All Dialog Functions ---
+  window.openClearAllWarning = () => {
+      document.getElementById('clearAllDialog').style.display = 'flex';
+  };
+  window.closeClearAllWarning = () => {
+      document.getElementById('clearAllDialog').style.display = 'none';
+  };
+  document.getElementById('confirmClearAllBtn').onclick = async () => {
+      closeClearAllWarning();
+      const list = document.getElementById('historyList');
+      list.innerHTML = "Clearing...";
+      try {
           const snap = await getDocs(historyRef);
           const batch = writeBatch(db);
           snap.forEach(d => batch.delete(d.ref));
           await batch.commit();
           showHistory();
-      }
+      } catch (e) { console.error(e); }
   };
 
-  // --- Edit Logic ---
+  // --- Edit & Tabs (Standard) ---
   let currentEditId = null;
-  window.openEditModal = (id, n, a) => {
-      currentEditId = id;
-      document.getElementById('editItemName').value = n;
-      document.getElementById('editItemAmount').value = a;
-      document.getElementById('editModal').style.display = 'flex';
-  };
+  window.openEditModal = (id, n, a) => { currentEditId = id; document.getElementById('editItemName').value = n; document.getElementById('editItemAmount').value = a; document.getElementById('editModal').style.display = 'flex'; };
   window.closeEditModal = () => { document.getElementById('editModal').style.display = 'none'; };
   window.saveEdit = async () => {
       const n = document.getElementById('editItemName').value, a = document.getElementById('editItemAmount').value;
-      if(n && a) {
-          await updateDoc(doc(db, "kitchenExpenses", currentEditId), { item: n, price: Number(a) });
-          closeEditModal();
-      }
+      if(n && a) { await updateDoc(doc(db, "kitchenExpenses", currentEditId), { item: n, price: Number(a) }); closeEditModal(); }
   };
 
-  // --- Core App Features ---
   const monthSelector = document.getElementById('monthFilter');
   for(let i=0; i<6; i++){
       const d = new Date(); d.setMonth(d.getMonth()-i);
@@ -278,10 +284,7 @@
 
   window.addItem = async (u) => {
       const i = document.getElementById(`item${u}`).value, p = document.getElementById(`price${u}`).value;
-      if(i && p) {
-          await addDoc(colRef, { user: u, item: i, price: Number(p), time: Date.now(), monthLabel: monthSelector.value });
-          document.getElementById(`item${u}`).value = ""; document.getElementById(`price${u}`).value = "";
-      }
+      if(i && p) { await addDoc(colRef, { user: u, item: i, price: Number(p), time: Date.now(), monthLabel: monthSelector.value }); document.getElementById(`item${u}`).value = ""; document.getElementById(`price${u}`).value = ""; }
   };
 
   window.openTab = (e, n) => {
