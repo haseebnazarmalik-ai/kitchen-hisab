@@ -3,6 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#075e54">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Kitchen%20Tracker%20Pro%22,%22short_name%22:%22Kitchen%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22#e5ddd5%22,%22theme_color%22:%22#075e54%22,%22icons%22:[{%22src%22:%22https://cdn-icons-png.flaticon.com/512/1041/1041916.png%22,%22sizes%22:%22512x512%22,%22type%22:%22image/png%22}]}">
+
     <title>Kitchen Tracker Pro</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
@@ -131,6 +136,14 @@
 </div>
 
 <script type="module">
+  // PWA Service Worker Registration
+  if ('serviceWorker' in navigator) {
+    const swCode = `self.addEventListener('fetch', function(e) { e.respondWith(fetch(e.request).catch(() => caches.match(e.request))); });`;
+    const blob = new Blob([swCode], {type: 'text/javascript'});
+    const swUrl = URL.createObjectURL(blob);
+    navigator.serviceWorker.register(swUrl);
+  }
+
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
   import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc, updateDoc, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -141,7 +154,7 @@
   const colRef = collection(db, "kitchenExpenses");
   const userEmails = { "haseebnazar.malik@gmail.com": "Haseeb", "haseebnazar.one@gmail.com": "Arsalan", "haseebnazar.two@gmail.com": "Aftab" };
   let currentUserRole = "", itemToDelete = null, itemToEdit = null;
-  let allEntries = []; // Main global data storage
+  let allEntries = [];
 
   onAuthStateChanged(auth, (user) => {
     if (user) {
@@ -172,29 +185,22 @@
   window.filterData = () => {
     onSnapshot(query(colRef, orderBy("time", "desc")), (snap) => {
       let gt = 0; 
-      allEntries = []; // Reset on every snapshot to avoid duplicates
+      allEntries = [];
       ['Haseeb', 'Arsalan', 'Aftab'].forEach(u => {
         const cont = document.getElementById(`list${u}`); let ut = 0; cont.innerHTML = ""; let lastLabel = "";
         snap.forEach(ds => {
           const d = ds.data();
           if((d.monthLabel || "Mar 2026") === monthSelector.value) {
-            // Push only once to global array
             if(d.user === u) {
-                allEntries.push({...d}); 
                 ut += Number(d.price);
                 const currentLabel = getDateLabel(d.time);
                 if (currentLabel !== lastLabel) { cont.innerHTML += `<div class="date-separator"><span>${currentLabel}</span></div>`; lastLabel = currentLabel; }
                 cont.innerHTML += `<li><div class="item-info"><span class="item-name">${d.item}</span><span class="item-time">${new Date(d.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span></div><div class="item-amount">SAR ${d.price}</div><div class="action-btns">${(u === currentUserRole) ? `<button class="edit-text" onclick="openEditModal('${ds.id}', '${d.item}', ${d.price})">Edit</button><button class="delete-text" onclick="openDelModal('${ds.id}')">Delete</button>` : ''}</div></li>`;
-            } else if (u === 'Haseeb' && !['Arsalan', 'Aftab'].includes(d.user)) {
-                // Safety for legacy/unknown data
-            } else if (!usersList.includes(d.user)) {
-                // This ensures allEntries only populates once per unique doc
             }
           }
         });
         document.getElementById(`total${u}`).innerText = ut; gt += ut;
       });
-      // Final step: ensure allEntries has everything exactly once
       allEntries = [];
       snap.forEach(ds => {
           const d = ds.data();
@@ -219,21 +225,16 @@
     if(allEntries.length === 0) return;
     document.getElementById('loaderOverlay').style.display = 'flex';
     const { jsPDF } = window.jspdf; const docPdf = new jsPDF();
-    
     docPdf.setFontSize(18); docPdf.setTextColor(7, 94, 84);
     docPdf.text(`Kitchen Expense Report - ${monthSelector.value}`, 14, 20);
-    
     let currentY = 30;
     usersList.forEach(u => {
-      // Filter from the global allEntries correctly
       const userItems = allEntries.filter(d => d.user === u).sort((a,b) => a.time - b.time);
       if(userItems.length > 0) {
         docPdf.setFontSize(14); docPdf.setTextColor(0);
         docPdf.text(`${u.toUpperCase()} LIST:`, 14, currentY + 5);
-        
         const rows = userItems.map(d => [new Date(d.time).toLocaleDateString('en-GB'), d.item, `SAR ${d.price}`]);
         const userTotal = userItems.reduce((s, d) => s + Number(d.price), 0);
-        
         docPdf.autoTable({
           head: [['Date', 'Item', 'Amount']],
           body: rows,
@@ -246,10 +247,8 @@
         currentY = docPdf.lastAutoTable.finalY + 10;
       }
     });
-
     docPdf.setFontSize(16); docPdf.setTextColor(7, 94, 84);
     docPdf.text(`GRAND TOTAL: SAR ${document.getElementById('grandTotal').innerText}`, 14, currentY + 5);
-
     setTimeout(() => {
         docPdf.save(`Kitchen_Report_${monthSelector.value}.pdf`);
         document.getElementById('loaderOverlay').style.display = 'none';
