@@ -6,38 +6,39 @@
     <title>Kitchen Tracker Pro</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-    
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #e5ddd5; margin: 0; padding: 0; }
         
-        /* Login Screen */
-        #loginPage { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #075e54; z-index: 5000; display: flex; align-items: center; justify-content: center; color: white; }
-        .login-card { background: white; padding: 30px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; color: #333; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
-        .login-card input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; width: -webkit-fill-available; }
-        .login-btn { width: 100%; background: #25d366; color: white; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-
-        /* Main App */
+        /* Loading & Login Hide */
+        #loginPage { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #075e54; z-index: 5000; display: none; align-items: center; justify-content: center; }
         #mainApp { display: none; }
+
+        .login-card { background: white; padding: 30px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; }
+        .login-card input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .login-btn { width: 100%; background: #25d366; color: white; padding: 12px; border: none; border-radius: 8px; font-weight: bold; }
+
         .header { background: #075e54; color: white; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
-        .tabs { display: flex; background: #075e54; position: sticky; top: 45px; z-index: 100; border-bottom: 1px solid #054d44; }
-        .tab { flex: 1; text-align: center; padding: 12px; color: #b1d4d0; font-weight: bold; cursor: pointer; border-bottom: 3px solid transparent; font-size: 14px; }
+        .tabs { display: flex; background: #075e54; position: sticky; top: 45px; z-index: 100; }
+        .tab { flex: 1; text-align: center; padding: 12px; color: #b1d4d0; font-weight: bold; cursor: pointer; border-bottom: 3px solid transparent; }
         .tab.active { color: white; border-bottom: 3px solid white; }
         
         .content { display: none; padding: 15px; padding-bottom: 100px; }
         .content.active { display: block; }
         
-        .input-card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .input-card input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
-        
-        .user-total-info { background: #dcf8c6; padding: 10px; border-radius: 8px; text-align: center; font-weight: bold; margin-bottom: 15px; color: #075e54; border: 1px solid #c1e0a8; }
+        .user-total-info { background: #dcf8c6; padding: 10px; border-radius: 8px; text-align: center; font-weight: bold; margin-bottom: 15px; color: #075e54; }
         
         li { background: white; padding: 12px; margin-bottom: 8px; border-radius: 10px; display: flex; align-items: center; justify-content: space-between; border-left: 5px solid #075e54; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .item-name { flex: 1; font-size: 15px; }
-        .item-price { font-weight: bold; color: #075e54; margin: 0 10px; }
+        .item-info { flex: 1; }
+        .item-time { font-size: 10px; color: #888; display: block; margin-top: 3px; }
         
-        .footer-fixed { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 15px; text-align: center; border-top: 1px solid #ddd; font-weight: bold; font-size: 16px; color: #333; z-index: 100; }
-        .del-btn { background: none; border: none; color: #e53935; font-size: 18px; cursor: pointer; padding: 0 5px; }
+        /* Pyara Delete Dialog */
+        #deleteModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9000; align-items: center; justify-content: center; }
+        .modal-box { background: white; padding: 20px; border-radius: 15px; width: 80%; max-width: 300px; text-align: center; }
+        .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-cancel { flex: 1; padding: 10px; border-radius: 8px; background: #eee; border: none; }
+        .btn-confirm { flex: 1; padding: 10px; border-radius: 8px; background: #e53935; color: white; border: none; }
+
+        .footer-fixed { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 15px; text-align: center; border-top: 1px solid #ddd; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -48,7 +49,7 @@
         <input type="email" id="loginEmail" placeholder="Email Address">
         <input type="password" id="loginPassword" placeholder="Password">
         <button class="login-btn" onclick="handleLogin()">Login</button>
-        <p id="loginError" style="color:red; font-size:12px; margin-top:10px; display:none;">Ghalat Email ya Password!</p>
+        <p id="loginError" style="color:red; display:none;">Ghalat Email ya Password!</p>
     </div>
 </div>
 
@@ -56,22 +57,21 @@
     <div class="header">
         <h1 style="font-size: 18px; margin: 0;">Kitchen Hisab 🥘</h1>
         <div style="display: flex; gap: 5px;">
-            <select id="monthFilter" onchange="filterData()" style="padding: 5px; border-radius: 5px; border: none; font-size: 12px;"></select>
-            <button onclick="generatePDF()" style="background: #25d366; color: white; border: none; padding: 5px 8px; border-radius: 5px; font-weight: bold; font-size: 12px;">PDF</button>
-            <button onclick="handleLogout()" style="background: #e53935; color: white; border: none; padding: 5px 8px; border-radius: 5px; font-weight: bold; font-size: 12px;">Logout</button>
+            <select id="monthFilter" onchange="filterData()" style="padding: 5px; border-radius: 5px; border: none;"></select>
+            <button onclick="handleLogout()" style="background: #e53935; color: white; border: none; padding: 5px 10px; border-radius: 5px; font-weight: bold;">Logout</button>
         </div>
     </div>
 
     <div class="tabs">
-        <div class="tab active" id="tabHaseeb" onclick="openTab(event, 'Haseeb')">HASEEB</div>
+        <div class="tab" id="tabHaseeb" onclick="openTab(event, 'Haseeb')">HASEEB</div>
         <div class="tab" id="tabArsalan" onclick="openTab(event, 'Arsalan')">ARSALAN</div>
         <div class="tab" id="tabAftab" onclick="openTab(event, 'Aftab')">AFTAB</div>
     </div>
 
-    <div id="Haseeb" class="content active">
-        <div class="input-card" id="inputHaseeb">
-            <input type="text" id="itemHaseeb" placeholder="Saman ka naam">
-            <input type="number" id="priceHaseeb" placeholder="Amount">
+    <div id="Haseeb" class="content">
+        <div class="input-card" id="inputHaseeb" style="background:white; padding:15px; border-radius:12px; margin-bottom:15px;">
+            <input type="text" id="itemHaseeb" placeholder="Saman ka naam" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:5px;">
+            <input type="number" id="priceHaseeb" placeholder="Amount" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:5px;">
             <button onclick="addItem('Haseeb')" style="width:100%; background:#25d366; color:white; padding:12px; border:none; border-radius:8px; font-weight:bold;">SAVE</button>
         </div>
         <div class="user-total-info">Total: SAR <span id="totalHaseeb">0</span></div>
@@ -79,9 +79,9 @@
     </div>
 
     <div id="Arsalan" class="content">
-        <div class="input-card" id="inputArsalan">
-            <input type="text" id="itemArsalan" placeholder="Saman ka naam">
-            <input type="number" id="priceArsalan" placeholder="Amount">
+        <div class="input-card" id="inputArsalan" style="background:white; padding:15px; border-radius:12px; margin-bottom:15px;">
+            <input type="text" id="itemArsalan" placeholder="Saman ka naam" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:5px;">
+            <input type="number" id="priceArsalan" placeholder="Amount" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:5px;">
             <button onclick="addItem('Arsalan')" style="width:100%; background:#25d366; color:white; padding:12px; border:none; border-radius:8px; font-weight:bold;">SAVE</button>
         </div>
         <div class="user-total-info">Total: SAR <span id="totalArsalan">0</span></div>
@@ -89,9 +89,9 @@
     </div>
 
     <div id="Aftab" class="content">
-        <div class="input-card" id="inputAftab">
-            <input type="text" id="itemAftab" placeholder="Saman ka naam">
-            <input type="number" id="priceAftab" placeholder="Amount">
+        <div class="input-card" id="inputAftab" style="background:white; padding:15px; border-radius:12px; margin-bottom:15px;">
+            <input type="text" id="itemAftab" placeholder="Saman ka naam" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:5px;">
+            <input type="number" id="priceAftab" placeholder="Amount" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:5px;">
             <button onclick="addItem('Aftab')" style="width:100%; background:#25d366; color:white; padding:12px; border:none; border-radius:8px; font-weight:bold;">SAVE</button>
         </div>
         <div class="user-total-info">Total: SAR <span id="totalAftab">0</span></div>
@@ -101,10 +101,21 @@
     <div class="footer-fixed">GRAND TOTAL: SAR <span id="grandTotal">0</span></div>
 </div>
 
+<div id="deleteModal">
+    <div class="modal-box">
+        <h3>Saman Delete Karein?</h3>
+        <p>Kya aap waqai is entry ko khatam karna chahte hain?</p>
+        <div class="modal-btns">
+            <button class="btn-cancel" onclick="closeDelModal()">Cancel</button>
+            <button class="btn-confirm" id="confirmDelBtn">Delete</button>
+        </div>
+    </div>
+</div>
+
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-  import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAywmVNaLkyudJelZ-Gdx6gL1hydzxe2cg",
@@ -127,13 +138,7 @@
   };
 
   let currentUserRole = "";
-
-  window.handleLogin = async () => {
-    const email = document.getElementById('loginEmail').value;
-    const pass = document.getElementById('loginPassword').value;
-    try { await signInWithEmailAndPassword(auth, email, pass); } 
-    catch (e) { document.getElementById('loginError').style.display = 'block'; }
-  };
+  let deleteId = null;
 
   onAuthStateChanged(auth, (user) => {
     if (user) {
@@ -141,17 +146,25 @@
       document.getElementById('loginPage').style.display = 'none';
       document.getElementById('mainApp').style.display = 'block';
       
-      // Control Input Visibility
+      // Auto-switch to user's own tab
+      document.getElementById(`tab${currentUserRole}`).click();
+      
       ['Haseeb', 'Arsalan', 'Aftab'].forEach(u => {
           document.getElementById(`input${u}`).style.display = (u === currentUserRole) ? "block" : "none";
       });
-      
       filterData();
     } else {
       document.getElementById('loginPage').style.display = 'flex';
       document.getElementById('mainApp').style.display = 'none';
     }
   });
+
+  window.handleLogin = async () => {
+    const email = document.getElementById('loginEmail').value;
+    const pass = document.getElementById('loginPassword').value;
+    try { await signInWithEmailAndPassword(auth, email, pass); } 
+    catch (e) { document.getElementById('loginError').style.display = 'block'; }
+  };
 
   window.handleLogout = () => signOut(auth);
 
@@ -172,11 +185,15 @@
                   const d = ds.data();
                   if(d.user === u && (d.monthLabel || "Mar 2026") === monthSelector.value) {
                       ut += Number(d.price);
-                      const canDelete = (u === currentUserRole);
+                      const dateStr = d.time ? new Date(d.time).toLocaleString('en-US', { weekday: 'short', hour: '2-digit', minute: '2-digit' }) : "";
+                      
                       cont.innerHTML += `<li>
-                        <span class="item-name">${d.item}</span> 
-                        <span class="item-price">SAR ${d.price}</span>
-                        ${canDelete ? `<button class="del-btn" onclick="deleteItem('${ds.id}')">🗑️</button>` : ''}
+                        <div class="item-info">
+                            <b>${d.item}</b>
+                            <span class="item-time">${dateStr}</span>
+                        </div>
+                        <div style="margin-right:10px;"><b>SAR ${d.price}</b></div>
+                        ${(u === currentUserRole) ? `<button onclick="openDelModal('${ds.id}')" style="background:none; border:none; font-size:18px;">🗑️</button>` : ''}
                       </li>`;
                   }
               });
@@ -194,29 +211,17 @@
       }
   };
 
-  window.deleteItem = async (id) => {
-      if(confirm("Delete this item?")) { await deleteDoc(doc(db, "kitchenExpenses", id)); }
+  // Custom Modal Functions
+  window.openDelModal = (id) => { deleteId = id; document.getElementById('deleteModal').style.display = 'flex'; };
+  window.closeDelModal = () => { document.getElementById('deleteModal').style.display = 'none'; };
+  document.getElementById('confirmDelBtn').onclick = async () => {
+      if(deleteId) { await deleteDoc(doc(db, "kitchenExpenses", deleteId)); closeDelModal(); }
   };
 
   window.openTab = (e, n) => {
     let c = document.getElementsByClassName("content"), t = document.getElementsByClassName("tab");
     for (let i=0; i<c.length; i++) { c[i].classList.remove("active"); t[i].classList.remove("active"); }
     document.getElementById(n).classList.add("active"); e.currentTarget.classList.add("active");
-  };
-
-  window.generatePDF = () => {
-    const { jsPDF } = window.jspdf;
-    const docPdf = new jsPDF();
-    docPdf.text("Kitchen Report - " + monthSelector.value, 14, 15);
-    
-    let finalY = 25;
-    ['Haseeb', 'Arsalan', 'Aftab'].forEach(u => {
-        docPdf.text(`${u}'s Total: SAR ${document.getElementById('total'+u).innerText}`, 14, finalY);
-        finalY += 10;
-    });
-    
-    docPdf.text(`GRAND TOTAL: SAR ${document.getElementById('grandTotal').innerText}`, 14, finalY + 5);
-    docPdf.save(`Kitchen_Report_${monthSelector.value}.pdf`);
   };
 </script>
 </body>
