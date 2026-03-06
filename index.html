@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Kitchen Tracker Pro</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #e5ddd5; margin: 0; padding: 0; }
         #loginPage, #mainApp { display: none; }
@@ -23,8 +25,10 @@
         .input-card input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 15px; }
         .save-btn { width: 100%; background: #25d366; color: white; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; }
 
-        .user-total-info { background: #dcf8c6; padding: 12px; border-radius: 10px; text-align: center; font-weight: bold; margin-bottom: 15px; color: #075e54; border: 1px solid #c1e0a8; }
+        .user-total-info { background: #dcf8c6; padding: 12px; border-radius: 10px; text-align: center; font-weight: bold; margin-bottom: 5px; color: #075e54; border: 1px solid #c1e0a8; }
         
+        .pdf-btn { width: 100%; background: #34b7f1; color: white; padding: 8px; border: none; border-radius: 8px; font-weight: bold; font-size: 13px; margin-bottom: 15px; cursor: pointer; }
+
         .date-separator { text-align: center; margin: 20px 0 10px; position: relative; }
         .date-separator span { background: #d1e9ff; color: #444; padding: 4px 12px; border-radius: 8px; font-size: 11px; font-weight: bold; text-transform: uppercase; box-shadow: 0 1px 1px rgba(0,0,0,0.1); }
 
@@ -38,13 +42,20 @@
         .edit-text { color: #25d366; font-weight: bold; font-size: 13px; cursor: pointer; border: none; background: none; }
         .delete-text { color: #e53935; font-weight: bold; font-size: 13px; cursor: pointer; border: none; background: none; }
 
-        /* Modals (Edit & Delete) */
+        /* Loader & Toast Styles */
+        #loaderOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.7); z-index: 10000; align-items: center; justify-content: center; flex-direction: column; }
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #075e54; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 20px; padding: 12px; position: fixed; z-index: 10001; left: 50%; bottom: 80px; transform: translateX(-50%); font-size: 14px; box-shadow: 0 3px 10px rgba(0,0,0,0.3); }
+        #toast.show { visibility: visible; animation: fadeInOut 3s; }
+        @keyframes fadeInOut { 0%, 100% { opacity: 0; } 10%, 90% { opacity: 1; } }
+
+        /* Modals */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
-        .modal-box { background: white; padding: 25px; border-radius: 20px; width: 85%; max-width: 320px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-        .modal-box h3 { margin: 0 0 15px; color: #333; }
-        .modal-box input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .modal-box { background: white; padding: 25px; border-radius: 20px; width: 85%; max-width: 320px; text-align: center; }
         .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
-        .btn-cancel { flex: 1; padding: 12px; border-radius: 10px; background: #f0f0f0; border: none; font-weight: bold; color: #555; }
+        .btn-cancel { flex: 1; padding: 12px; border-radius: 10px; background: #f0f0f0; border: none; font-weight: bold; }
         .btn-update { flex: 1; padding: 12px; border-radius: 10px; background: #25d366; color: white; border: none; font-weight: bold; }
         .btn-delete { flex: 1; padding: 12px; border-radius: 10px; background: #e53935; color: white; border: none; font-weight: bold; }
 
@@ -52,6 +63,13 @@
     </style>
 </head>
 <body>
+
+<div id="loaderOverlay">
+    <div class="spinner"></div>
+    <p style="color: #075e54; font-weight: bold; margin-top: 10px;">Generating PDF...</p>
+</div>
+
+<div id="toast">Check download file in download folder</div>
 
 <div id="loginPage">
     <div class="login-card">
@@ -84,6 +102,7 @@
             <button class="save-btn" onclick="addItem('Haseeb')">SAVE</button>
         </div>
         <div class="user-total-info">Total: SAR <span id="totalHaseeb">0</span></div>
+        <button class="pdf-btn" onclick="downloadPDF('Haseeb')">Download PDF Report</button>
         <div id="listHaseeb"></div>
     </div>
 
@@ -94,6 +113,7 @@
             <button class="save-btn" onclick="addItem('Arsalan')">SAVE</button>
         </div>
         <div class="user-total-info">Total: SAR <span id="totalArsalan">0</span></div>
+        <button class="pdf-btn" onclick="downloadPDF('Arsalan')">Download PDF Report</button>
         <div id="listArsalan"></div>
     </div>
 
@@ -104,6 +124,7 @@
             <button class="save-btn" onclick="addItem('Aftab')">SAVE</button>
         </div>
         <div class="user-total-info">Total: SAR <span id="totalAftab">0</span></div>
+        <button class="pdf-btn" onclick="downloadPDF('Aftab')">Download PDF Report</button>
         <div id="listAftab"></div>
     </div>
 
@@ -113,8 +134,8 @@
 <div id="editModal" class="modal-overlay">
     <div class="modal-box">
         <h3>Edit Item</h3>
-        <input type="text" id="editItemName" placeholder="Saman ka naam">
-        <input type="number" id="editItemPrice" placeholder="Amount">
+        <input type="text" id="editItemName">
+        <input type="number" id="editItemPrice">
         <div class="modal-btns">
             <button class="btn-cancel" onclick="closeEditModal()">Cancel</button>
             <button class="btn-update" id="confirmUpdate">Update</button>
@@ -150,7 +171,6 @@
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
-
   enableIndexedDbPersistence(db).catch(() => {});
 
   const colRef = collection(db, "kitchenExpenses");
@@ -158,6 +178,7 @@
   let currentUserRole = "";
   let itemToDelete = null;
   let itemToEdit = null;
+  let currentMonthData = [];
 
   onAuthStateChanged(auth, (user) => {
     if (user) {
@@ -165,10 +186,7 @@
       document.getElementById('headerUserName').innerText = `, ${currentUserRole}`;
       document.getElementById('loginPage').style.display = 'none';
       document.getElementById('mainApp').style.display = 'block';
-      
-      // LOGOUT LOGIC: Only show for Haseeb's Email
       document.getElementById('logoutBtn').style.display = (user.email === "haseebnazar.malik@gmail.com") ? "block" : "none";
-      
       document.getElementById(`tab${currentUserRole}`)?.click();
       ['Haseeb', 'Arsalan', 'Aftab'].forEach(u => {
           document.getElementById(`input${u}`).style.display = (u === currentUserRole) ? "block" : "none";
@@ -204,6 +222,7 @@
   window.filterData = () => {
     onSnapshot(query(colRef, orderBy("time", "desc")), (snap) => {
       let gt = 0;
+      currentMonthData = []; // Store for PDF
       ['Haseeb', 'Arsalan', 'Aftab'].forEach(u => {
         const cont = document.getElementById(`list${u}`);
         let ut = 0; cont.innerHTML = "";
@@ -211,6 +230,7 @@
         snap.forEach(ds => {
           const d = ds.data();
           if(d.user === u && (d.monthLabel || "Mar 2026") === monthSelector.value) {
+            currentMonthData.push({...d, id: ds.id});
             ut += Number(d.price);
             const currentLabel = getDateLabel(d.time);
             if (currentLabel !== lastLabel) { cont.innerHTML += `<div class="date-separator"><span>${currentLabel}</span></div>`; lastLabel = currentLabel; }
@@ -244,35 +264,61 @@
     }
   };
 
-  // EDIT MODAL LOGIC
-  window.openEditModal = (id, name, price) => {
-    itemToEdit = id;
-    document.getElementById('editItemName').value = name;
-    document.getElementById('editItemPrice').value = price;
-    document.getElementById('editModal').style.display = 'flex';
-  };
-  window.closeEditModal = () => { document.getElementById('editModal').style.display = 'none'; };
-  document.getElementById('confirmUpdate').onclick = async () => {
-    const newName = document.getElementById('editItemName').value;
-    const newPrice = document.getElementById('editItemPrice').value;
-    if(itemToEdit && newName && newPrice) {
-      const id = itemToEdit;
-      closeEditModal();
-      await updateDoc(doc(db, "kitchenExpenses", id), { item: newName, price: Number(newPrice) });
-    }
+  // PDF LOGIC
+  window.downloadPDF = async (userName) => {
+    document.getElementById('loaderOverlay').style.display = 'flex';
+    const { jsPDF } = window.jspdf;
+    const docPdf = new jsPDF();
+    const filtered = currentMonthData.filter(d => d.user === userName);
+    const total = filtered.reduce((sum, d) => sum + d.price, 0);
+
+    docPdf.setFontSize(18);
+    docPdf.text(`Kitchen Expense Report - ${userName}`, 14, 20);
+    docPdf.setFontSize(12);
+    docPdf.text(`Month: ${monthSelector.value}`, 14, 30);
+    docPdf.text(`Generated on: ${new Date().toLocaleString()}`, 14, 38);
+
+    const rows = filtered.map(d => [
+      new Date(d.time).toLocaleDateString(),
+      d.item,
+      `SAR ${d.price}`
+    ]);
+
+    docPdf.autoTable({
+      head: [['Date', 'Item Name', 'Amount']],
+      body: rows,
+      startY: 45,
+      theme: 'grid',
+      headStyles: { fillColor: [7, 94, 84] }
+    });
+
+    const finalY = docPdf.lastAutoTable.finalY + 10;
+    docPdf.setFontSize(14);
+    docPdf.text(`Total Expense: SAR ${total}`, 14, finalY);
+
+    setTimeout(() => {
+        docPdf.save(`${userName}_Kitchen_${monthSelector.value}.pdf`);
+        document.getElementById('loaderOverlay').style.display = 'none';
+        showToast();
+    }, 1500);
   };
 
-  // DELETE MODAL LOGIC
+  function showToast() {
+    const x = document.getElementById("toast");
+    x.className = "show";
+    setTimeout(() => { x.className = x.className.replace("show", ""); }, 3000);
+  }
+
+  // Edit/Delete Logic Same As Before
+  window.openEditModal = (id, name, price) => { itemToEdit = id; document.getElementById('editItemName').value = name; document.getElementById('editItemPrice').value = price; document.getElementById('editModal').style.display = 'flex'; };
+  window.closeEditModal = () => { document.getElementById('editModal').style.display = 'none'; };
+  document.getElementById('confirmUpdate').onclick = async () => {
+    const n = document.getElementById('editItemName').value, p = document.getElementById('editItemPrice').value;
+    if(itemToEdit && n && p) { const id = itemToEdit; closeEditModal(); await updateDoc(doc(db, "kitchenExpenses", id), { item: n, price: Number(p) }); }
+  };
   window.openDelModal = (id) => { itemToDelete = id; document.getElementById('deleteModal').style.display = 'flex'; };
   window.closeDelModal = () => { document.getElementById('deleteModal').style.display = 'none'; };
-  document.getElementById('confirmDelete').onclick = async () => {
-      if(itemToDelete) { 
-          const id = itemToDelete;
-          itemToDelete = null;
-          closeDelModal();
-          await deleteDoc(doc(db, "kitchenExpenses", id)); 
-      }
-  };
+  document.getElementById('confirmDelete').onclick = async () => { if(itemToDelete) { const id = itemToDelete; itemToDelete = null; closeDelModal(); await deleteDoc(doc(db, "kitchenExpenses", id)); } };
 
   window.openTab = (e, n) => {
     let c = document.getElementsByClassName("content"), t = document.getElementsByClassName("tab");
