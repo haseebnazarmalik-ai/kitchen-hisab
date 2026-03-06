@@ -10,8 +10,7 @@
         #loginPage { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #075e54; z-index: 5000; align-items: center; justify-content: center; }
         .login-card { background: white; padding: 30px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; }
         .login-card input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        .login-btn { width: 100%; background: #25d366; color: white; padding: 12px; border: none; border-radius: 8px; font-weight: bold; }
-
+        
         .header { background: #075e54; color: white; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
         .tabs { display: flex; background: #075e54; position: sticky; top: 45px; z-index: 100; }
         .tab { flex: 1; text-align: center; padding: 12px; color: #b1d4d0; font-weight: bold; cursor: pointer; border-bottom: 3px solid transparent; font-size: 13px; }
@@ -20,30 +19,29 @@
         .content { display: none; padding: 12px; padding-bottom: 100px; }
         .content.active { display: block; }
         
-        /* Alignment Improvements */
-        .input-card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .input-row { display: flex; gap: 8px; margin-bottom: 10px; }
-        .input-row input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; outline: none; }
-        .save-btn { width: 100%; background: #25d366; color: white; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 15px; }
+        /* Fixed Alignment (Back to Original Style) */
+        .input-card { background: white; padding: 15px; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .input-card input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 15px; }
+        .save-btn { width: 100%; background: #25d366; color: white; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 
-        .user-total-info { background: #dcf8c6; padding: 10px; border-radius: 8px; text-align: center; font-weight: bold; margin-bottom: 12px; color: #075e54; border: 1px solid #c1e0a8; }
+        .user-total-info { background: #dcf8c6; padding: 12px; border-radius: 10px; text-align: center; font-weight: bold; margin-bottom: 15px; color: #075e54; border: 1px solid #c1e0a8; }
         
-        /* List Alignment Fix */
-        li { background: white; padding: 10px 12px; margin-bottom: 8px; border-radius: 10px; display: flex; align-items: center; border-left: 5px solid #075e54; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-        .item-details { flex: 2; overflow: hidden; }
-        .item-name { font-size: 15px; font-weight: 500; color: #333; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .item-time { font-size: 10px; color: #888; margin-top: 2px; display: block; }
-        .item-amount { flex: 1; text-align: right; font-weight: bold; color: #075e54; font-size: 14px; padding-right: 10px; white-space: nowrap; }
-        .del-icon { color: #e53935; font-size: 18px; cursor: pointer; padding-left: 5px; }
+        /* List Style */
+        li { background: white; padding: 12px; margin-bottom: 10px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; border-left: 6px solid #075e54; box-shadow: 0 2px 4px rgba(0,0,0,0.08); }
+        .item-info { flex: 1; }
+        .item-name { font-size: 16px; font-weight: bold; color: #333; display: block; }
+        .item-time { font-size: 11px; color: #777; margin-top: 3px; }
+        .item-amount { font-weight: bold; color: #075e54; font-size: 15px; margin-right: 15px; }
+        .del-btn { background: none; border: none; cursor: pointer; font-size: 18px; padding: 5px; }
 
         /* Custom Modal */
         #deleteModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9000; align-items: center; justify-content: center; }
-        .modal-box { background: white; padding: 25px; border-radius: 15px; width: 80%; max-width: 300px; text-align: center; }
-        .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
-        .btn-cancel { flex: 1; padding: 10px; border-radius: 8px; background: #eee; border: none; font-weight: bold; }
-        .btn-confirm { flex: 1; padding: 10px; border-radius: 8px; background: #e53935; color: white; border: none; font-weight: bold; }
+        .modal-box { background: white; padding: 25px; border-radius: 20px; width: 80%; max-width: 300px; text-align: center; }
+        .modal-btns { display: flex; gap: 12px; margin-top: 20px; }
+        .btn-cancel { flex: 1; padding: 12px; border-radius: 10px; background: #eee; border: none; font-weight: bold; }
+        .btn-confirm { flex: 1; padding: 12px; border-radius: 10px; background: #e53935; color: white; border: none; font-weight: bold; }
 
-        .footer-fixed { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 15px; text-align: center; border-top: 1px solid #ddd; font-weight: bold; z-index: 100; font-size: 16px; }
+        .footer-fixed { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 15px; text-align: center; border-top: 1px solid #ddd; font-weight: bold; z-index: 100; font-size: 16px; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
     </style>
 </head>
 <body>
@@ -53,7 +51,7 @@
         <h2 style="color:#075e54; margin-top:0;">Kitchen Login</h2>
         <input type="email" id="loginEmail" placeholder="Email Address">
         <input type="password" id="loginPassword" placeholder="Password">
-        <button class="login-btn" onclick="handleLogin()">Login</button>
+        <button class="save-btn" onclick="handleLogin()">Login</button>
         <p id="loginError" style="color:red; font-size:12px; margin-top:10px; display:none;">Ghalat Email ya Password!</p>
     </div>
 </div>
@@ -61,9 +59,9 @@
 <div id="mainApp">
     <div class="header">
         <h1 style="font-size: 18px; margin: 0;">Kitchen Hisab 🥘</h1>
-        <div style="display: flex; gap: 5px;">
+        <div style="display: flex; gap: 8px;">
             <select id="monthFilter" onchange="filterData()" style="padding: 5px; border-radius: 5px; border: none; font-size: 12px;"></select>
-            <button onclick="handleLogout()" style="background: #e53935; color: white; border: none; padding: 5px 8px; border-radius: 5px; font-weight: bold; font-size: 11px;">Logout</button>
+            <button onclick="handleLogout()" style="background: #e53935; color: white; border: none; padding: 5px 10px; border-radius: 5px; font-weight: bold; font-size: 11px;">Logout</button>
         </div>
     </div>
 
@@ -75,10 +73,8 @@
 
     <div id="Haseeb" class="content">
         <div class="input-card" id="inputHaseeb">
-            <div class="input-row">
-                <input type="text" id="itemHaseeb" placeholder="Saman">
-                <input type="number" id="priceHaseeb" placeholder="Amount">
-            </div>
+            <input type="text" id="itemHaseeb" placeholder="Saman ka naam">
+            <input type="number" id="priceHaseeb" placeholder="Amount">
             <button class="save-btn" onclick="addItem('Haseeb')">SAVE</button>
         </div>
         <div class="user-total-info">Total: SAR <span id="totalHaseeb">0</span></div>
@@ -87,10 +83,8 @@
 
     <div id="Arsalan" class="content">
         <div class="input-card" id="inputArsalan">
-            <div class="input-row">
-                <input type="text" id="itemArsalan" placeholder="Saman">
-                <input type="number" id="priceArsalan" placeholder="Amount">
-            </div>
+            <input type="text" id="itemArsalan" placeholder="Saman ka naam">
+            <input type="number" id="priceArsalan" placeholder="Amount">
             <button class="save-btn" onclick="addItem('Arsalan')">SAVE</button>
         </div>
         <div class="user-total-info">Total: SAR <span id="totalArsalan">0</span></div>
@@ -99,10 +93,8 @@
 
     <div id="Aftab" class="content">
         <div class="input-card" id="inputAftab">
-            <div class="input-row">
-                <input type="text" id="itemAftab" placeholder="Saman">
-                <input type="number" id="priceAftab" placeholder="Amount">
-            </div>
+            <input type="text" id="itemAftab" placeholder="Saman ka naam">
+            <input type="number" id="priceAftab" placeholder="Amount">
             <button class="save-btn" onclick="addItem('Aftab')">SAVE</button>
         </div>
         <div class="user-total-info">Total: SAR <span id="totalAftab">0</span></div>
@@ -118,7 +110,7 @@
         <p style="color:#666; font-size:14px;">Kya aap is entry ko hatana chahte hain?</p>
         <div class="modal-btns">
             <button class="btn-cancel" onclick="closeDelModal()">Nahi</button>
-            <button class="btn-confirm" id="confirmDelBtn">Delete</button>
+            <button class="btn-confirm" id="confirmDelBtn">Haan</button>
         </div>
     </div>
 </div>
@@ -181,18 +173,23 @@
       const opt = document.createElement('option'); opt.value = m; opt.text = m; monthSelector.appendChild(opt);
   }
 
-  // Smart Date Formatter
-  function formatSmartDate(timestamp) {
+  // WhatsApp Style Date Formatter
+  function formatWhatsAppDate(timestamp) {
     if(!timestamp) return "";
     const date = new Date(timestamp);
     const now = new Date();
-    const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+    const diffTime = now - date;
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
     const timeStr = date.toLocaleString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
 
-    if (diffDays === 0 && date.getDate() === now.getDate()) return `Today ${timeStr}`;
-    if (diffDays === 1 || (diffDays === 0 && date.getDate() !== now.getDate())) return `Yesterday ${timeStr}`;
-    if (diffDays < 7) return date.toLocaleString('en-US', { weekday: 'short' }) + ` ${timeStr}`;
-    return date.toLocaleString('en-US', { day: '2-digit', month: 'short' }) + ` ${timeStr}`;
+    if (date.toDateString() === now.toDateString()) return `Today, ${timeStr}`;
+    
+    const yesterday = new Date(); yesterday.setDate(now.getDate() - 1);
+    if (date.toDateString() === yesterday.toDateString()) return `Yesterday, ${timeStr}`;
+    
+    if (diffDays < 7) return date.toLocaleString('en-US', { weekday: 'long' }) + `, ${timeStr}`;
+    
+    return date.toLocaleString('en-US', { day: '2-digit', month: 'short', year: 'numeric' }) + `, ${timeStr}`;
   }
 
   window.filterData = () => {
@@ -206,12 +203,12 @@
                   if(d.user === u && (d.monthLabel || "Mar 2026") === monthSelector.value) {
                       ut += Number(d.price);
                       cont.innerHTML += `<li>
-                        <div class="item-details">
+                        <div class="item-info">
                             <span class="item-name">${d.item}</span>
-                            <span class="item-time">${formatSmartDate(d.time)}</span>
+                            <span class="item-time">${formatWhatsAppDate(d.time)}</span>
                         </div>
                         <div class="item-amount">SAR ${d.price}</div>
-                        ${(u === currentUserRole) ? `<div class="del-icon" onclick="openDelModal('${ds.id}')">🗑️</div>` : ''}
+                        ${(u === currentUserRole) ? `<button class="del-btn" onclick="openDelModal('${ds.id}')">🗑️</button>` : ''}
                       </li>`;
                   }
               });
