@@ -13,32 +13,25 @@
     
     <style>
         body { font-family: 'Segoe UI', Roboto, sans-serif; background: #e5ddd5; margin: 0; padding: 0; overflow-x: hidden; }
-        
-        /* --- LOGIN SCREEN STYLE --- */
         #loginPage { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #075e54; z-index: 5000; display: flex; align-items: center; justify-content: center; color: white; }
         .login-card { background: white; padding: 30px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; color: #333; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
-        .login-card h2 { color: #075e54; margin-bottom: 20px; }
         .login-card input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        .login-btn { width: 100%; background: #25d366; color: white; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; }
-
-        /* --- MAIN APP STYLE --- */
+        .login-btn { width: 100%; background: #25d366; color: white; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
         #mainApp { display: none; }
-        .sidenav { height: 100%; width: 0; position: fixed; z-index: 2000; top: 0; left: 0; background-color: white; overflow-x: hidden; transition: 0.3s; padding-top: 60px; box-shadow: 2px 0 10px rgba(0,0,0,0.2); }
-        .sidenav a { padding: 15px 25px; text-decoration: none; font-size: 18px; color: #333; display: block; border-bottom: 1px solid #eee; }
         .header { background: #075e54; color: white; padding: 12px 15px; position: sticky; top: 0; z-index: 100; display: flex; align-items: center; gap: 10px; }
         .tabs { display: flex; background: #075e54; color: #b1d4d0; position: sticky; top: 50px; z-index: 100; }
-        .tab { flex: 1; text-align: center; padding: 14px 0; font-weight: bold; font-size: 12px; text-transform: uppercase; cursor: pointer; border-bottom: 3px solid transparent; }
+        .tab { flex: 1; text-align: center; padding: 14px 0; font-weight: bold; cursor: pointer; border-bottom: 3px solid transparent; }
         .tab.active { color: white; border-bottom: 3px solid #fff; }
         .content { display: none; padding: 15px; padding-bottom: 110px; }
         .content.active { display: block; }
-        .input-card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 15px; }
-        .user-total-info { background: #dcf8c6; padding: 10px; border-radius: 8px; font-weight: bold; text-align: center; color: #075e54; margin-bottom: 15px; }
+        .input-card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; }
+        .user-total-info { background: #dcf8c6; padding: 10px; border-radius: 8px; font-weight: bold; text-align: center; margin-bottom: 15px; }
         li { background: white; padding: 10px; margin-bottom: 8px; border-radius: 10px; display: flex; align-items: center; border-left: 5px solid #075e54; }
-        .footer-fixed { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 15px; text-align: center; z-index: 1000; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); }
-        
-        /* Modals */
+        .footer-fixed { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 15px; text-align: center; z-index: 1000; }
         .modal { display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); align-items: center; justify-content: center; }
         .modal-content { background: white; padding: 25px; border-radius: 15px; width: 85%; max-width: 380px; text-align: center; }
+        .sidenav { height: 100%; width: 0; position: fixed; z-index: 2000; top: 0; left: 0; background: white; transition: 0.3s; padding-top: 60px; box-shadow: 2px 0 10px rgba(0,0,0,0.2); overflow-x: hidden; }
+        .sidenav a { padding: 15px 25px; text-decoration: none; font-size: 18px; color: #333; display: block; border-bottom: 1px solid #eee; }
     </style>
 </head>
 <body>
@@ -57,7 +50,6 @@
     <div id="mySidenav" class="sidenav">
         <a href="javascript:void(0)" onclick="closeNav()" style="font-size:30px; color:#075e54;">&times;</a>
         <div id="userWelcome" style="padding:20px; font-weight:bold; color:#075e54; border-bottom:2px solid #eee;">Hi, User</div>
-        <a href="#" onclick="showHistory()">🗑️ Delete History</a>
         <a href="#" onclick="sendPasswordReset()">⚙️ Change Password</a>
         <a href="#" onclick="handleLogout()" style="color:red;">🚪 Logout</a>
     </div>
@@ -65,8 +57,7 @@
     <div class="header">
         <span onclick="openNav()" style="font-size:24px; cursor:pointer;">&#9776;</span>
         <h1 style="flex-grow:1; font-size:16px; margin:0;">Kitchen Hisab 🥘</h1>
-        <select id="monthFilter" onchange="filterData()" style="background:#128c7e; color:white; border:1px solid #fff; padding:5px; border-radius:5px;"></select>
-        <button onclick="generatePDF()" style="background:#25d366; color:white; border:none; padding:8px 12px; border-radius:5px; font-weight:bold; font-size:11px;">PDF</button>
+        <select id="monthFilter" onchange="filterData()" style="background:#128c7e; color:white; padding:5px; border-radius:5px;"></select>
     </div>
 
     <div class="tabs">
@@ -76,28 +67,27 @@
     </div>
 
     <div id="Haseeb" class="content">
-        <div class="input-card"><input type="text" id="itemHaseeb" placeholder="Saman" style="width:100%; padding:10px; margin-bottom:10px;"><input type="number" id="priceHaseeb" placeholder="Amount" style="width:100%; padding:10px; margin-bottom:10px;"><button onclick="addItem('Haseeb')" style="width:100%; background:#25d366; color:white; padding:12px; border:none; border-radius:8px; font-weight:bold;">SAVE</button></div>
+        <div class="input-card"><input type="text" id="itemHaseeb" placeholder="Saman" style="width:100%; margin-bottom:10px; padding:10px;"><input type="number" id="priceHaseeb" placeholder="Amount" style="width:100%; margin-bottom:10px; padding:10px;"><button onclick="addItem('Haseeb')" style="width:100%; background:#25d366; color:white; padding:12px; border:none; border-radius:8px;">SAVE</button></div>
         <div class="user-total-info">Total: SAR <span id="totalHaseeb">0</span></div>
         <div id="listHaseeb"></div>
     </div>
     <div id="Arsalan" class="content">
-        <div class="input-card"><input type="text" id="itemArsalan" placeholder="Saman" style="width:100%; padding:10px; margin-bottom:10px;"><input type="number" id="priceArsalan" placeholder="Amount" style="width:100%; padding:10px; margin-bottom:10px;"><button onclick="addItem('Arsalan')" style="width:100%; background:#25d366; color:white; padding:12px; border:none; border-radius:8px; font-weight:bold;">SAVE</button></div>
+        <div class="input-card"><input type="text" id="itemArsalan" placeholder="Saman" style="width:100%; margin-bottom:10px; padding:10px;"><input type="number" id="priceArsalan" placeholder="Amount" style="width:100%; margin-bottom:10px; padding:10px;"><button onclick="addItem('Arsalan')" style="width:100%; background:#25d366; color:white; padding:12px; border:none; border-radius:8px;">SAVE</button></div>
         <div class="user-total-info">Total: SAR <span id="totalArsalan">0</span></div>
         <div id="listArsalan"></div>
     </div>
     <div id="Aftab" class="content">
-        <div class="input-card"><input type="text" id="itemAftab" placeholder="Saman" style="width:100%; padding:10px; margin-bottom:10px;"><input type="number" id="priceAftab" placeholder="Amount" style="width:100%; padding:10px; margin-bottom:10px;"><button onclick="addItem('Aftab')" style="width:100%; background:#25d366; color:white; padding:12px; border:none; border-radius:8px; font-weight:bold;">SAVE</button></div>
+        <div class="input-card"><input type="text" id="itemAftab" placeholder="Saman" style="width:100%; margin-bottom:10px; padding:10px;"><input type="number" id="priceAftab" placeholder="Amount" style="width:100%; margin-bottom:10px; padding:10px;"><button onclick="addItem('Aftab')" style="width:100%; background:#25d366; color:white; padding:12px; border:none; border-radius:8px;">SAVE</button></div>
         <div class="user-total-info">Total: SAR <span id="totalAftab">0</span></div>
         <div id="listAftab"></div>
     </div>
-
     <div class="footer-fixed"><b>GRAND TOTAL: SAR <span id="grandTotal">0</span></b></div>
 </div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-  import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, getDocs, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAywmVNaLkyudJelZ-Gdx6gL1hydzxe2cg",
@@ -111,42 +101,28 @@
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
+  const colRef = collection(db, "kitchenExpenses");
 
-  // ############################################################
-  // IDAR EMAILS LIKHO (Apni asali emails yahan badal dein)
-  // ############################################################
   const userEmails = {
-    "haseebnazar.malik@gmail.com": "Haseeb",   // <-- Haseeb ki email
-    "haseebnazar.one@gmail.com": "Arsalan", // <-- Arsalan ki email
-    "haseebnazar.two@gmail.com": "Aftab"      // <-- Aftab ki email
+    "haseebnazar.malik@gmail.com": "Haseeb",
+    "haseebnazar.one@gmail.com": "Arsalan",
+    "haseebnazar.two@gmail.com": "Aftab"
   };
 
-  let currentUserDisplayName = "";
-
-  // --- Login Logic ---
   window.handleLogin = async () => {
     const email = document.getElementById('loginEmail').value;
     const pass = document.getElementById('loginPassword').value;
-    try {
-      await signInWithEmailAndPassword(auth, email, pass);
-    } catch (e) {
-      document.getElementById('loginError').style.display = 'block';
-    }
+    try { await signInWithEmailAndPassword(auth, email, pass); } 
+    catch (e) { document.getElementById('loginError').style.display = 'block'; }
   };
 
   onAuthStateChanged(auth, (user) => {
     if (user) {
       document.getElementById('loginPage').style.display = 'none';
       document.getElementById('mainApp').style.display = 'block';
-      currentUserDisplayName = userEmails[user.email] || "User";
-      document.getElementById('userWelcome').innerText = "Hi, " + currentUserDisplayName;
-      
-      // Auto open user's tab
-      if(currentUserDisplayName !== "User") {
-          document.getElementById('tab' + currentUserDisplayName).click();
-      } else {
-          document.getElementById('tabHaseeb').click();
-      }
+      const name = userEmails[user.email] || "User";
+      document.getElementById('userWelcome').innerText = "Hi, " + name;
+      document.getElementById('tab' + name).click();
       filterData();
     } else {
       document.getElementById('loginPage').style.display = 'flex';
@@ -155,18 +131,42 @@
   });
 
   window.handleLogout = () => signOut(auth);
-
-  // --- Password Reset Logic ---
-  window.sendPasswordReset = () => {
-      const email = auth.currentUser.email;
-      sendPasswordResetEmail(auth, email).then(() => {
-          alert("Password badalne ka link aap ki email (" + email + ") par bhej diya gaya hai. Apna Inbox check karein.");
-      }).catch(e => alert("Error: " + e.message));
-  };
-
-  // --- App Features ---
   window.openNav = () => document.getElementById("mySidenav").style.width = "260px";
   window.closeNav = () => document.getElementById("mySidenav").style.width = "0";
+
+  const monthSelector = document.getElementById('monthFilter');
+  for(let i=0; i<6; i++){
+      const d = new Date(); d.setMonth(d.getMonth()-i);
+      const m = `${d.toLocaleString('default', { month: 'short' })} ${d.getFullYear()}`;
+      const opt = document.createElement('option'); opt.value = m; opt.text = m; monthSelector.appendChild(opt);
+  }
+
+  window.filterData = () => {
+      onSnapshot(query(colRef, orderBy("time", "desc")), (snap) => {
+          let gt = 0;
+          ['Haseeb', 'Arsalan', 'Aftab'].forEach(u => {
+              const cont = document.getElementById(`list${u}`);
+              let ut = 0; cont.innerHTML = "";
+              snap.forEach(ds => {
+                  const d = ds.data();
+                  if(d.user === u && (d.monthLabel || "Mar 2026") === monthSelector.value) {
+                      ut += Number(d.price);
+                      cont.innerHTML += `<li><div style="flex:1">${d.item}</div><div style="font-weight:bold; color:#075e54">SAR ${d.price}</div></li>`;
+                  }
+              });
+              document.getElementById(`total${u}`).innerText = ut; gt += ut;
+          });
+          document.getElementById('grandTotal').innerText = gt;
+      });
+  };
+
+  window.addItem = async (u) => {
+      const i = document.getElementById(`item${u}`).value, p = document.getElementById(`price${u}`).value;
+      if(i && p) {
+          await addDoc(colRef, { user: u, item: i, price: Number(p), time: Date.now(), monthLabel: monthSelector.value });
+          document.getElementById(`item${u}`).value = ""; document.getElementById(`price${u}`).value = "";
+      }
+  };
 
   window.openTab = (e, n) => {
     let c = document.getElementsByClassName("content"), t = document.getElementsByClassName("tab");
@@ -174,10 +174,6 @@
     for (let i=0; i<t.length; i++) t[i].classList.remove("active");
     document.getElementById(n).classList.add("active"); e.currentTarget.classList.add("active");
   };
-
-  // ... (Baqi Database filter, add, delete logic purani hi hai)
-  // ... filterData(), addItem(), generatePDF() logic remains the same
 </script>
 </body>
 </html>
-
