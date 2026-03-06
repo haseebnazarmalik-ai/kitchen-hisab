@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kitchen Hisab</title>
+    <title>Kitchen Tracker Pro</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
     <style>
@@ -26,29 +26,53 @@
         .save-btn { width: 100%; background: #25d366; color: white; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; }
 
         .user-total-info { background: #dcf8c6; padding: 12px; border-radius: 10px; text-align: center; font-weight: bold; margin-bottom: 15px; color: #075e54; border: 1px solid #c1e0a8; }
-        .pdf-header-btn { background: #25d366; color: white; border: none; padding: 5px 12px; border-radius: 5px; font-weight: bold; font-size: 12px; cursor: pointer; margin-right: 5px; }
+        
+        .pdf-header-btn { background: #34b7f1; color: white; border: none; padding: 5px 8px; border-radius: 5px; font-weight: bold; font-size: 11px; cursor: pointer; }
+
+        .date-separator { text-align: center; margin: 20px 0 10px; position: relative; }
+        .date-separator span { background: #d1e9ff; color: #444; padding: 4px 12px; border-radius: 8px; font-size: 11px; font-weight: bold; text-transform: uppercase; box-shadow: 0 1px 1px rgba(0,0,0,0.1); }
 
         li { background: white; padding: 12px; margin-bottom: 10px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; border-left: 6px solid #075e54; box-shadow: 0 2px 4px rgba(0,0,0,0.08); }
         .item-info { flex: 1; }
         .item-name { font-size: 16px; font-weight: bold; color: #333; display: block; }
-        .item-time { font-size: 11px; color: #777; }
+        .item-time { font-size: 11px; color: #777; margin-top: 3px; }
         .item-amount { font-weight: bold; color: #075e54; font-size: 15px; margin-right: 10px; }
-        .delete-icon { cursor: pointer; font-size: 18px; }
+        
+        .action-btns { display: flex; gap: 8px; }
+        .edit-text { color: #25d366; font-weight: bold; font-size: 13px; cursor: pointer; border: none; background: none; }
+        .delete-text { color: #e53935; font-weight: bold; font-size: 13px; cursor: pointer; border: none; background: none; }
 
         #loaderOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.7); z-index: 10000; align-items: center; justify-content: center; flex-direction: column; }
         .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #075e54; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .footer-fixed { position: fixed; bottom: 0; left: 0; right: 0; background: #f6f6f6; padding: 15px; text-align: center; border-top: 1px solid #ddd; font-weight: bold; font-size: 16px; }
+        #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 20px; padding: 12px; position: fixed; z-index: 10001; left: 50%; bottom: 80px; transform: translateX(-50%); font-size: 14px; }
+        #toast.show { visibility: visible; animation: fadeInOut 3s; }
+        @keyframes fadeInOut { 0%, 100% { opacity: 0; } 10%, 90% { opacity: 1; } }
+
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
+        .modal-box { background: white; padding: 25px; border-radius: 20px; width: 80%; max-width: 300px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: popIn 0.3s ease; }
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .modal-box input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .modal-btns { display: flex; gap: 10px; }
+        .btn-cancel { flex: 1; padding: 12px; border-radius: 10px; background: #f0f0f0; border: none; font-weight: bold; color: #555; }
+        .btn-confirm-del { flex: 1; padding: 12px; border-radius: 10px; background: #e53935; color: white; border: none; font-weight: bold; }
+        .btn-confirm-edit { flex: 1; padding: 12px; border-radius: 10px; background: #25d366; color: white; border: none; font-weight: bold; }
+
+        .footer-fixed { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 15px; text-align: center; border-top: 1px solid #ddd; font-weight: bold; z-index: 100; font-size: 16px; }
     </style>
 </head>
 <body>
 
-<div id="loaderOverlay"><div class="spinner"></div><p>Generating Clean Report...</p></div>
+<div id="loaderOverlay">
+    <div class="spinner"></div>
+    <p style="color: #075e54; font-weight: bold; margin-top: 10px;">Generating Sorted Report...</p>
+</div>
+<div id="toast">Check download file in download folder</div>
 
 <div id="loginPage">
     <div class="login-card">
-        <h2 style="color:#075e54;">Kitchen Login</h2>
+        <h2 style="color:#075e54; margin-top:0;">Kitchen Login</h2>
         <input type="email" id="loginEmail" placeholder="Email Address">
         <input type="password" id="loginPassword" placeholder="Password">
         <button class="save-btn" onclick="handleLogin()">Login</button>
@@ -57,62 +81,88 @@
 
 <div id="mainApp">
     <div class="header">
-        <h1 style="font-size: 18px; margin: 0;">Kitchen Hisab 🥘</h1>
-        <div style="display: flex; align-items: center;">
-            <select id="monthFilter" onchange="filterData()" style="padding: 5px; border-radius: 5px; border: none; margin-right: 5px;"></select>
-            <button class="pdf-header-btn" onclick="downloadSortedReport()">PDF</button>
-            <button onclick="handleLogout()" style="background: #e53935; color: white; border: none; padding: 5px 10px; border-radius: 5px; font-weight: bold;">Logout</button>
+        <h1 style="font-size: 18px; margin: 0;">Hi<span id="headerUserName"></span> 🥘</h1>
+        <div style="display: flex; gap: 5px; align-items: center;">
+            <select id="monthFilter" onchange="filterData()" style="padding: 5px; border-radius: 5px; border: none; font-size: 12px;"></select>
+            <button class="pdf-header-btn" onclick="downloadFullReport()">PDF</button>
+            <button id="logoutBtn" onclick="handleLogout()" style="background: #e53935; color: white; border: none; padding: 5px 8px; border-radius: 5px; font-weight: bold; font-size: 11px; display:none;">Logout</button>
         </div>
     </div>
 
     <div class="tabs">
-        <div class="tab active" onclick="openTab(event, 'Haseeb')">HASEEB</div>
-        <div class="tab" onclick="openTab(event, 'Arsalan')">ARSALAN</div>
-        <div class="tab" onclick="openTab(event, 'Aftab')">AFTAB</div>
+        <div class="tab" id="tabHaseeb" onclick="openTab(event, 'Haseeb')">HASEEB</div>
+        <div class="tab" id="tabArsalan" onclick="openTab(event, 'Arsalan')">ARSALAN</div>
+        <div class="tab" id="tabAftab" onclick="openTab(event, 'Aftab')">AFTAB</div>
     </div>
 
-    <div id="Haseeb" class="content active">
-        <div class="input-card" id="inputHaseeb">
-            <input type="text" id="itemHaseeb" placeholder="Saman ka naam">
-            <input type="number" id="priceHaseeb" placeholder="Amount">
-            <button class="save-btn" onclick="addItem('Haseeb')">SAVE</button>
-        </div>
+    <div id="Haseeb" class="content">
+        <div class="input-card" id="inputHaseeb"><input type="text" id="itemHaseeb" placeholder="Saman ka naam"><input type="number" id="priceHaseeb" placeholder="Amount"><button class="save-btn" onclick="addItem('Haseeb')">SAVE</button></div>
         <div class="user-total-info">Total: SAR <span id="totalHaseeb">0</span></div>
-        <ul id="listHaseeb" style="list-style:none; padding:0;"></ul>
+        <div id="listHaseeb"></div>
     </div>
-
     <div id="Arsalan" class="content">
-        <div class="input-card" id="inputArsalan">
-            <input type="text" id="itemArsalan" placeholder="Saman ka naam">
-            <input type="number" id="priceArsalan" placeholder="Amount">
-            <button class="save-btn" onclick="addItem('Arsalan')">SAVE</button>
-        </div>
+        <div class="input-card" id="inputArsalan"><input type="text" id="itemArsalan" placeholder="Saman ka naam"><input type="number" id="priceArsalan" placeholder="Amount"><button class="save-btn" onclick="addItem('Arsalan')">SAVE</button></div>
         <div class="user-total-info">Total: SAR <span id="totalArsalan">0</span></div>
-        <ul id="listArsalan" style="list-style:none; padding:0;"></ul>
+        <div id="listArsalan"></div>
     </div>
-
     <div id="Aftab" class="content">
-        <div class="input-card" id="inputAftab">
-            <input type="text" id="itemAftab" placeholder="Saman ka naam">
-            <input type="number" id="priceAftab" placeholder="Amount">
-            <button class="save-btn" onclick="addItem('Aftab')">SAVE</button>
-        </div>
+        <div class="input-card" id="inputAftab"><input type="text" id="itemAftab" placeholder="Saman ka naam"><input type="number" id="priceAftab" placeholder="Amount"><button class="save-btn" onclick="addItem('Aftab')">SAVE</button></div>
         <div class="user-total-info">Total: SAR <span id="totalAftab">0</span></div>
-        <ul id="listAftab" style="list-style:none; padding:0;"></ul>
+        <div id="listAftab"></div>
     </div>
 
     <div class="footer-fixed">GRAND TOTAL: SAR <span id="grandTotal">0</span></div>
 </div>
 
+<div id="editModal" class="modal-overlay">
+    <div class="modal-box">
+        <h3>Edit Item</h3>
+        <input type="text" id="editItemName"><input type="number" id="editItemPrice">
+        <div class="modal-btns">
+            <button class="btn-cancel" onclick="closeEditModal()">Cancel</button>
+            <button class="btn-confirm-edit" id="confirmUpdate">Save</button>
+        </div>
+    </div>
+</div>
+
+<div id="deleteModal" class="modal-overlay">
+    <div class="modal-box">
+        <h3>Delete?</h3>
+        <p>Kya aap waqai is entry ko khatam karna chahte hain?</p>
+        <div class="modal-btns"><button class="btn-cancel" onclick="closeDelModal()">Nahi</button><button class="btn-confirm-del" id="confirmDelete">Haan, Delete</button></div>
+    </div>
+</div>
+
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-  import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc, updateDoc, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
   const firebaseConfig = { apiKey: "AIzaSyAywmVNaLkyudJelZ-Gdx6gL1hydzxe2cg", authDomain: "haseeb-984fc.firebaseapp.com", projectId: "haseeb-984fc", storageBucket: "haseeb-984fc.firebasestorage.app", messagingSenderId: "868884894390", appId: "1:868884894390:web:f203e0bad5882fc709cc17" };
   const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app);
+  enableIndexedDbPersistence(db).catch(() => {});
   const colRef = collection(db, "kitchenExpenses");
-  let allEntries = [];
+  const userEmails = { "haseebnazar.malik@gmail.com": "Haseeb", "haseebnazar.one@gmail.com": "Arsalan", "haseebnazar.two@gmail.com": "Aftab" };
+  let currentUserRole = "", itemToDelete = null, itemToEdit = null, allEntries = [];
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      currentUserRole = userEmails[user.email] || "Viewer";
+      document.getElementById('headerUserName').innerText = `, ${currentUserRole}`;
+      document.getElementById('loginPage').style.display = 'none';
+      document.getElementById('mainApp').style.display = 'block';
+      document.getElementById('logoutBtn').style.display = (user.email === "haseebnazar.malik@gmail.com") ? "block" : "none";
+      document.getElementById(`tab${currentUserRole}`)?.click();
+      ['Haseeb', 'Arsalan', 'Aftab'].forEach(u => { document.getElementById(`input${u}`).style.display = (u === currentUserRole) ? "block" : "none"; });
+      filterData();
+    } else { document.getElementById('loginPage').style.display = 'flex'; document.getElementById('mainApp').style.display = 'none'; }
+  });
+
+  window.handleLogin = async () => {
+    const e = document.getElementById('loginEmail').value, p = document.getElementById('loginPassword').value;
+    try { await signInWithEmailAndPassword(auth, e, p); } catch { alert("Login Fail!"); }
+  };
+  window.handleLogout = () => signOut(auth);
 
   const monthSelector = document.getElementById('monthFilter');
   for(let i=0; i<6; i++){
@@ -121,86 +171,94 @@
       const opt = document.createElement('option'); opt.value = m; opt.text = m; monthSelector.appendChild(opt);
   }
 
-  onSnapshot(query(colRef, orderBy("time", "desc")), (snap) => {
-    allEntries = [];
-    let gt = 0;
-    const users = ['Haseeb', 'Arsalan', 'Aftab'];
-    
-    users.forEach(u => {
-        const cont = document.getElementById(`list${u}`);
-        let ut = 0; cont.innerHTML = "";
-        
+  window.filterData = () => {
+    onSnapshot(query(colRef, orderBy("time", "desc")), (snap) => {
+      let gt = 0; allEntries = [];
+      ['Haseeb', 'Arsalan', 'Aftab'].forEach(u => {
+        const cont = document.getElementById(`list${u}`); let ut = 0; cont.innerHTML = ""; let lastLabel = "";
         snap.forEach(ds => {
-            const d = ds.data();
-            if((d.monthLabel || "Mar 2026") === monthSelector.value) {
-                // Store only once in allEntries
-                if (!allEntries.find(e => e.id === ds.id)) {
-                    allEntries.push({...d, id: ds.id});
-                }
-                
-                if(d.user === u) {
-                    ut += Number(d.price);
-                    cont.innerHTML += `<li><div class="item-info"><span class="item-name">${d.item}</span><span class="item-time">${new Date(d.time).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span></div><div class="item-amount">SAR ${d.price}</div><span class="delete-icon" onclick="deleteItem('${ds.id}')">🗑️</span></li>`;
-                }
+          const d = ds.data();
+          if((d.monthLabel || "Mar 2026") === monthSelector.value) {
+            allEntries.push({...d});
+            if(d.user === u) {
+                ut += Number(d.price);
+                const currentLabel = getDateLabel(d.time);
+                if (currentLabel !== lastLabel) { cont.innerHTML += `<div class="date-separator"><span>${currentLabel}</span></div>`; lastLabel = currentLabel; }
+                cont.innerHTML += `<li><div class="item-info"><span class="item-name">${d.item}</span><span class="item-time">${new Date(d.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span></div><div class="item-amount">SAR ${d.price}</div><div class="action-btns">${(u === currentUserRole) ? `<button class="edit-text" onclick="openEditModal('${ds.id}', '${d.item}', ${d.price})">Edit</button><button class="delete-text" onclick="openDelModal('${ds.id}')">Delete</button>` : ''}</div></li>`;
             }
+          }
         });
-        document.getElementById(`total${u}`).innerText = ut;
-        gt += ut;
+        document.getElementById(`total${u}`).innerText = ut; gt += ut;
+      });
+      document.getElementById('grandTotal').innerText = gt;
     });
-    document.getElementById('grandTotal').innerText = gt;
-  });
-
-  window.downloadSortedReport = () => {
-    const selectedMonth = monthSelector.value;
-    const filtered = allEntries.filter(d => (d.monthLabel || "Mar 2026") === selectedMonth);
-    if(filtered.length === 0) return;
-
-    document.getElementById('loaderOverlay').style.display = 'flex';
-    const { jsPDF } = window.jspdf;
-    const docPdf = new jsPDF();
-    let currentY = 30;
-    let grandTotalSum = 0;
-
-    docPdf.setFontSize(18); docPdf.text(`Kitchen Report - ${selectedMonth}`, 14, 20);
-
-    ['Haseeb', 'Arsalan', 'Aftab'].forEach(u => {
-        const uItems = filtered.filter(item => item.user === u).sort((a,b) => a.time - b.time);
-        if(uItems.length > 0) {
-            const uTotal = uItems.reduce((s, i) => s + Number(i.price), 0);
-            grandTotalSum += uTotal;
-
-            docPdf.setFontSize(14); docPdf.text(`${u.toUpperCase()}:`, 14, currentY + 5);
-            docPdf.autoTable({
-                head: [['Date', 'Item', 'Amount']],
-                body: uItems.map(d => [new Date(d.time).toLocaleDateString('en-GB'), d.item, `SAR ${d.price}`]),
-                startY: currentY + 8,
-                theme: 'grid',
-                headStyles: { fillColor: [7, 94, 84] },
-                foot: [['', 'Total', `SAR ${uTotal}`]],
-                footStyles: { fillColor: [220, 248, 198], textColor: [0], fontStyle: 'bold' }
-            });
-            currentY = docPdf.lastAutoTable.finalY + 10;
-        }
-    });
-
-    docPdf.setFontSize(16); docPdf.text(`GRAND TOTAL: SAR ${grandTotalSum}`, 14, currentY + 5);
-    docPdf.save(`Kitchen_${selectedMonth}.pdf`);
-    document.getElementById('loaderOverlay').style.display = 'none';
   };
+
+  function getDateLabel(t) { const d = new Date(t), now = new Date(); if(d.toDateString()===now.toDateString()) return "Today"; return d.toLocaleDateString('en-GB', {day:'2-digit', month:'short'}); }
 
   window.addItem = async (u) => {
-      const i = document.getElementById(`item${u}`).value, p = document.getElementById(`price${u}`).value;
-      if(i && p) { await addDoc(colRef, { user: u, item: i, price: Number(p), time: Date.now(), monthLabel: monthSelector.value }); document.getElementById(`item${u}`).value=""; document.getElementById(`price${u}`).value=""; }
+    const i = document.getElementById(`item${u}`).value, p = document.getElementById(`price${u}`).value;
+    if(i && p) { await addDoc(colRef, { user: u, item: i, price: Number(p), time: Date.now(), monthLabel: monthSelector.value }); document.getElementById(`item${u}`).value = ""; document.getElementById(`price${u}`).value = ""; }
   };
-  window.deleteItem = async (id) => { if(confirm("Delete?")) await deleteDoc(doc(db, "kitchenExpenses", id)); };
+
+  window.downloadFullReport = async () => {
+    if(allEntries.length === 0) return;
+    document.getElementById('loaderOverlay').style.display = 'flex';
+    const { jsPDF } = window.jspdf; const docPdf = new jsPDF();
+    
+    docPdf.setFontSize(18); docPdf.setTextColor(7, 94, 84);
+    docPdf.text(`Kitchen Expense Report - ${monthSelector.value}`, 14, 20);
+    
+    let currentY = 30;
+    const users = ['Haseeb', 'Arsalan', 'Aftab'];
+
+    users.forEach(u => {
+      const userItems = allEntries.filter(d => d.user === u).sort((a,b) => a.time - b.time);
+      if(userItems.length > 0) {
+        docPdf.setFontSize(14); docPdf.setTextColor(0);
+        docPdf.text(`${u.toUpperCase()} LIST:`, 14, currentY + 5);
+        
+        const rows = userItems.map(d => [new Date(d.time).toLocaleDateString('en-GB'), d.item, `SAR ${d.price}`]);
+        const userTotal = userItems.reduce((s, d) => s + d.price, 0);
+        
+        docPdf.autoTable({
+          head: [['Date', 'Item', 'Amount']],
+          body: rows,
+          startY: currentY + 8,
+          theme: 'grid',
+          headStyles: { fillColor: [7, 94, 84] },
+          foot: [['', 'TOTAL', `SAR ${userTotal}`]],
+          footStyles: { fillColor: [220, 248, 198], textColor: [0], fontStyle: 'bold' }
+        });
+        currentY = docPdf.lastAutoTable.finalY + 10;
+      }
+    });
+
+    docPdf.setFontSize(16); docPdf.setTextColor(7, 94, 84);
+    docPdf.text(`GRAND TOTAL: SAR ${document.getElementById('grandTotal').innerText}`, 14, currentY + 5);
+
+    setTimeout(() => {
+        docPdf.save(`Kitchen_Report_${monthSelector.value}.pdf`);
+        document.getElementById('loaderOverlay').style.display = 'none';
+        const x = document.getElementById("toast"); x.className = "show"; setTimeout(() => { x.className = ""; }, 3000);
+    }, 1500);
+  };
+
+  window.openEditModal = (id, name, price) => { itemToEdit = id; document.getElementById('editItemName').value = name; document.getElementById('editItemPrice').value = price; document.getElementById('editModal').style.display = 'flex'; };
+  window.closeEditModal = () => { document.getElementById('editModal').style.display = 'none'; };
+  document.getElementById('confirmUpdate').onclick = async () => {
+    const n = document.getElementById('editItemName').value, p = document.getElementById('editItemPrice').value;
+    if(itemToEdit && n && p) { const id = itemToEdit; closeEditModal(); await updateDoc(doc(db, "kitchenExpenses", id), { item: n, price: Number(p) }); }
+  };
+  window.openDelModal = (id) => { itemToDelete = id; document.getElementById('deleteModal').style.display = 'flex'; };
+  window.closeDelModal = () => { document.getElementById('deleteModal').style.display = 'none'; };
+  document.getElementById('confirmDelete').onclick = async () => { if(itemToDelete) { const id = itemToDelete; itemToDelete = null; closeDelModal(); await deleteDoc(doc(db, "kitchenExpenses", id)); } };
+
   window.openTab = (e, n) => {
-      let c = document.getElementsByClassName("content"), t = document.getElementsByClassName("tab");
-      for(let i=0; i<c.length; i++){ c[i].classList.remove("active"); t[i].classList.remove("active"); }
-      document.getElementById(n).classList.add("active"); e.currentTarget.classList.add("active");
+    let c = document.getElementsByClassName("content"), t = document.getElementsByClassName("tab");
+    for (let i=0; i<c.length; i++) { c[i].classList.remove("active"); t[i].classList.remove("active"); }
+    document.getElementById(n).classList.add("active"); e.currentTarget.classList.add("active");
   };
-  window.handleLogin = async () => { /* Logic */ };
-  window.handleLogout = () => signOut(auth);
-  onAuthStateChanged(auth, (user) => { if(user) { document.getElementById('loginPage').style.display='none'; document.getElementById('mainApp').style.display='block'; } else { document.getElementById('loginPage').style.display='flex'; } });
 </script>
 </body>
 </html>
