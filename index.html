@@ -4,41 +4,46 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Kitchen Tracker Pro</title>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #e5ddd5; margin: 0; padding: 0; }
-        
-        /* Loading & Login Hide */
-        #loginPage { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #075e54; z-index: 5000; display: none; align-items: center; justify-content: center; }
-        #mainApp { display: none; }
-
+        #loginPage, #mainApp { display: none; }
+        #loginPage { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #075e54; z-index: 5000; align-items: center; justify-content: center; }
         .login-card { background: white; padding: 30px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; }
         .login-card input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
         .login-btn { width: 100%; background: #25d366; color: white; padding: 12px; border: none; border-radius: 8px; font-weight: bold; }
 
         .header { background: #075e54; color: white; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
         .tabs { display: flex; background: #075e54; position: sticky; top: 45px; z-index: 100; }
-        .tab { flex: 1; text-align: center; padding: 12px; color: #b1d4d0; font-weight: bold; cursor: pointer; border-bottom: 3px solid transparent; }
+        .tab { flex: 1; text-align: center; padding: 12px; color: #b1d4d0; font-weight: bold; cursor: pointer; border-bottom: 3px solid transparent; font-size: 13px; }
         .tab.active { color: white; border-bottom: 3px solid white; }
         
-        .content { display: none; padding: 15px; padding-bottom: 100px; }
+        .content { display: none; padding: 12px; padding-bottom: 100px; }
         .content.active { display: block; }
         
-        .user-total-info { background: #dcf8c6; padding: 10px; border-radius: 8px; text-align: center; font-weight: bold; margin-bottom: 15px; color: #075e54; }
-        
-        li { background: white; padding: 12px; margin-bottom: 8px; border-radius: 10px; display: flex; align-items: center; justify-content: space-between; border-left: 5px solid #075e54; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .item-info { flex: 1; }
-        .item-time { font-size: 10px; color: #888; display: block; margin-top: 3px; }
-        
-        /* Pyara Delete Dialog */
-        #deleteModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9000; align-items: center; justify-content: center; }
-        .modal-box { background: white; padding: 20px; border-radius: 15px; width: 80%; max-width: 300px; text-align: center; }
-        .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
-        .btn-cancel { flex: 1; padding: 10px; border-radius: 8px; background: #eee; border: none; }
-        .btn-confirm { flex: 1; padding: 10px; border-radius: 8px; background: #e53935; color: white; border: none; }
+        /* Alignment Improvements */
+        .input-card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .input-row { display: flex; gap: 8px; margin-bottom: 10px; }
+        .input-row input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; outline: none; }
+        .save-btn { width: 100%; background: #25d366; color: white; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 15px; }
 
-        .footer-fixed { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 15px; text-align: center; border-top: 1px solid #ddd; font-weight: bold; }
+        .user-total-info { background: #dcf8c6; padding: 10px; border-radius: 8px; text-align: center; font-weight: bold; margin-bottom: 12px; color: #075e54; border: 1px solid #c1e0a8; }
+        
+        /* List Alignment Fix */
+        li { background: white; padding: 10px 12px; margin-bottom: 8px; border-radius: 10px; display: flex; align-items: center; border-left: 5px solid #075e54; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .item-details { flex: 2; overflow: hidden; }
+        .item-name { font-size: 15px; font-weight: 500; color: #333; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .item-time { font-size: 10px; color: #888; margin-top: 2px; display: block; }
+        .item-amount { flex: 1; text-align: right; font-weight: bold; color: #075e54; font-size: 14px; padding-right: 10px; white-space: nowrap; }
+        .del-icon { color: #e53935; font-size: 18px; cursor: pointer; padding-left: 5px; }
+
+        /* Custom Modal */
+        #deleteModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9000; align-items: center; justify-content: center; }
+        .modal-box { background: white; padding: 25px; border-radius: 15px; width: 80%; max-width: 300px; text-align: center; }
+        .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-cancel { flex: 1; padding: 10px; border-radius: 8px; background: #eee; border: none; font-weight: bold; }
+        .btn-confirm { flex: 1; padding: 10px; border-radius: 8px; background: #e53935; color: white; border: none; font-weight: bold; }
+
+        .footer-fixed { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 15px; text-align: center; border-top: 1px solid #ddd; font-weight: bold; z-index: 100; font-size: 16px; }
     </style>
 </head>
 <body>
@@ -49,7 +54,7 @@
         <input type="email" id="loginEmail" placeholder="Email Address">
         <input type="password" id="loginPassword" placeholder="Password">
         <button class="login-btn" onclick="handleLogin()">Login</button>
-        <p id="loginError" style="color:red; display:none;">Ghalat Email ya Password!</p>
+        <p id="loginError" style="color:red; font-size:12px; margin-top:10px; display:none;">Ghalat Email ya Password!</p>
     </div>
 </div>
 
@@ -57,8 +62,8 @@
     <div class="header">
         <h1 style="font-size: 18px; margin: 0;">Kitchen Hisab 🥘</h1>
         <div style="display: flex; gap: 5px;">
-            <select id="monthFilter" onchange="filterData()" style="padding: 5px; border-radius: 5px; border: none;"></select>
-            <button onclick="handleLogout()" style="background: #e53935; color: white; border: none; padding: 5px 10px; border-radius: 5px; font-weight: bold;">Logout</button>
+            <select id="monthFilter" onchange="filterData()" style="padding: 5px; border-radius: 5px; border: none; font-size: 12px;"></select>
+            <button onclick="handleLogout()" style="background: #e53935; color: white; border: none; padding: 5px 8px; border-radius: 5px; font-weight: bold; font-size: 11px;">Logout</button>
         </div>
     </div>
 
@@ -69,30 +74,36 @@
     </div>
 
     <div id="Haseeb" class="content">
-        <div class="input-card" id="inputHaseeb" style="background:white; padding:15px; border-radius:12px; margin-bottom:15px;">
-            <input type="text" id="itemHaseeb" placeholder="Saman ka naam" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:5px;">
-            <input type="number" id="priceHaseeb" placeholder="Amount" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:5px;">
-            <button onclick="addItem('Haseeb')" style="width:100%; background:#25d366; color:white; padding:12px; border:none; border-radius:8px; font-weight:bold;">SAVE</button>
+        <div class="input-card" id="inputHaseeb">
+            <div class="input-row">
+                <input type="text" id="itemHaseeb" placeholder="Saman">
+                <input type="number" id="priceHaseeb" placeholder="Amount">
+            </div>
+            <button class="save-btn" onclick="addItem('Haseeb')">SAVE</button>
         </div>
         <div class="user-total-info">Total: SAR <span id="totalHaseeb">0</span></div>
         <div id="listHaseeb"></div>
     </div>
 
     <div id="Arsalan" class="content">
-        <div class="input-card" id="inputArsalan" style="background:white; padding:15px; border-radius:12px; margin-bottom:15px;">
-            <input type="text" id="itemArsalan" placeholder="Saman ka naam" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:5px;">
-            <input type="number" id="priceArsalan" placeholder="Amount" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:5px;">
-            <button onclick="addItem('Arsalan')" style="width:100%; background:#25d366; color:white; padding:12px; border:none; border-radius:8px; font-weight:bold;">SAVE</button>
+        <div class="input-card" id="inputArsalan">
+            <div class="input-row">
+                <input type="text" id="itemArsalan" placeholder="Saman">
+                <input type="number" id="priceArsalan" placeholder="Amount">
+            </div>
+            <button class="save-btn" onclick="addItem('Arsalan')">SAVE</button>
         </div>
         <div class="user-total-info">Total: SAR <span id="totalArsalan">0</span></div>
         <div id="listArsalan"></div>
     </div>
 
     <div id="Aftab" class="content">
-        <div class="input-card" id="inputAftab" style="background:white; padding:15px; border-radius:12px; margin-bottom:15px;">
-            <input type="text" id="itemAftab" placeholder="Saman ka naam" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:5px;">
-            <input type="number" id="priceAftab" placeholder="Amount" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:5px;">
-            <button onclick="addItem('Aftab')" style="width:100%; background:#25d366; color:white; padding:12px; border:none; border-radius:8px; font-weight:bold;">SAVE</button>
+        <div class="input-card" id="inputAftab">
+            <div class="input-row">
+                <input type="text" id="itemAftab" placeholder="Saman">
+                <input type="number" id="priceAftab" placeholder="Amount">
+            </div>
+            <button class="save-btn" onclick="addItem('Aftab')">SAVE</button>
         </div>
         <div class="user-total-info">Total: SAR <span id="totalAftab">0</span></div>
         <div id="listAftab"></div>
@@ -103,10 +114,10 @@
 
 <div id="deleteModal">
     <div class="modal-box">
-        <h3>Saman Delete Karein?</h3>
-        <p>Kya aap waqai is entry ko khatam karna chahte hain?</p>
+        <h3 style="margin:0;">Delete Karein?</h3>
+        <p style="color:#666; font-size:14px;">Kya aap is entry ko hatana chahte hain?</p>
         <div class="modal-btns">
-            <button class="btn-cancel" onclick="closeDelModal()">Cancel</button>
+            <button class="btn-cancel" onclick="closeDelModal()">Nahi</button>
             <button class="btn-confirm" id="confirmDelBtn">Delete</button>
         </div>
     </div>
@@ -115,7 +126,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-  import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAywmVNaLkyudJelZ-Gdx6gL1hydzxe2cg",
@@ -145,10 +156,8 @@
       currentUserRole = userEmails[user.email] || "Viewer";
       document.getElementById('loginPage').style.display = 'none';
       document.getElementById('mainApp').style.display = 'block';
-      
-      // Auto-switch to user's own tab
-      document.getElementById(`tab${currentUserRole}`).click();
-      
+      const myTab = document.getElementById(`tab${currentUserRole}`);
+      if(myTab) myTab.click();
       ['Haseeb', 'Arsalan', 'Aftab'].forEach(u => {
           document.getElementById(`input${u}`).style.display = (u === currentUserRole) ? "block" : "none";
       });
@@ -160,12 +169,9 @@
   });
 
   window.handleLogin = async () => {
-    const email = document.getElementById('loginEmail').value;
-    const pass = document.getElementById('loginPassword').value;
-    try { await signInWithEmailAndPassword(auth, email, pass); } 
-    catch (e) { document.getElementById('loginError').style.display = 'block'; }
+    const email = document.getElementById('loginEmail').value, pass = document.getElementById('loginPassword').value;
+    try { await signInWithEmailAndPassword(auth, email, pass); } catch (e) { document.getElementById('loginError').style.display = 'block'; }
   };
-
   window.handleLogout = () => signOut(auth);
 
   const monthSelector = document.getElementById('monthFilter');
@@ -173,6 +179,20 @@
       const d = new Date(); d.setMonth(d.getMonth()-i);
       const m = `${d.toLocaleString('default', { month: 'short' })} ${d.getFullYear()}`;
       const opt = document.createElement('option'); opt.value = m; opt.text = m; monthSelector.appendChild(opt);
+  }
+
+  // Smart Date Formatter
+  function formatSmartDate(timestamp) {
+    if(!timestamp) return "";
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+    const timeStr = date.toLocaleString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+    if (diffDays === 0 && date.getDate() === now.getDate()) return `Today ${timeStr}`;
+    if (diffDays === 1 || (diffDays === 0 && date.getDate() !== now.getDate())) return `Yesterday ${timeStr}`;
+    if (diffDays < 7) return date.toLocaleString('en-US', { weekday: 'short' }) + ` ${timeStr}`;
+    return date.toLocaleString('en-US', { day: '2-digit', month: 'short' }) + ` ${timeStr}`;
   }
 
   window.filterData = () => {
@@ -185,15 +205,13 @@
                   const d = ds.data();
                   if(d.user === u && (d.monthLabel || "Mar 2026") === monthSelector.value) {
                       ut += Number(d.price);
-                      const dateStr = d.time ? new Date(d.time).toLocaleString('en-US', { weekday: 'short', hour: '2-digit', minute: '2-digit' }) : "";
-                      
                       cont.innerHTML += `<li>
-                        <div class="item-info">
-                            <b>${d.item}</b>
-                            <span class="item-time">${dateStr}</span>
+                        <div class="item-details">
+                            <span class="item-name">${d.item}</span>
+                            <span class="item-time">${formatSmartDate(d.time)}</span>
                         </div>
-                        <div style="margin-right:10px;"><b>SAR ${d.price}</b></div>
-                        ${(u === currentUserRole) ? `<button onclick="openDelModal('${ds.id}')" style="background:none; border:none; font-size:18px;">🗑️</button>` : ''}
+                        <div class="item-amount">SAR ${d.price}</div>
+                        ${(u === currentUserRole) ? `<div class="del-icon" onclick="openDelModal('${ds.id}')">🗑️</div>` : ''}
                       </li>`;
                   }
               });
@@ -211,7 +229,6 @@
       }
   };
 
-  // Custom Modal Functions
   window.openDelModal = (id) => { deleteId = id; document.getElementById('deleteModal').style.display = 'flex'; };
   window.closeDelModal = () => { document.getElementById('deleteModal').style.display = 'none'; };
   document.getElementById('confirmDelBtn').onclick = async () => {
