@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kitchen Tracker Pro - Secured</title>
+    <title>Kitchen Tracker Pro</title>
     
     <meta name="theme-color" content="#075e54">
     <link rel="manifest" id="manifest-placeholder">
@@ -37,40 +37,23 @@
         li { background: white; padding: 10px; margin-bottom: 8px; border-radius: 10px; display: flex; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-left: 5px solid #075e54; }
         .item-info { display: flex; flex-grow: 1; align-items: center; margin-right: 5px; overflow: hidden; }
         .item-name { font-weight: 500; color: #333; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 14px; }
-        .item-price { font-weight: 700; color: #075e54; width: 70px; text-align: right; margin-right: 10px; font-size: 14px; }
+        .item-price { font-weight: 700; color: #075e54; width: 75px; text-align: right; margin-right: 10px; font-size: 14px; }
         .item-time { font-size: 9px; color: #888; width: 50px; text-align: right; margin-right: 5px; }
         
         .btn-group { display: flex; gap: 5px; }
         .edit-btn { color: #34b7f1; border: 1px solid #d1f0ff; background: #f0faff; border-radius: 6px; padding: 5px 8px; cursor: pointer; font-size: 10px; }
         .del-btn { color: #ff5252; border: 1px solid #ffcccc; background: #fff5f5; border-radius: 6px; padding: 5px 8px; cursor: pointer; font-size: 10px; }
 
-        /* Edit Modal Style */
-        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease; }
-        .modal.open { display: flex; opacity: 1; }
-        .modal-content { background: white; padding: 20px; border-radius: 15px; width: 85%; max-width: 400px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); transform: scale(0.9); transition: transform 0.3s ease; }
-        .modal.open .modal-content { transform: scale(1); }
-        .modal-content h3 { margin-top: 0; color: #075e54; font-size: 18px; }
-        .modal-content input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        .modal-btns { display: flex; gap: 10px; margin-top: 15px; }
-        .modal-btns button { flex: 1; padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-size: 14px; }
-        .save-edit { background: #075e54; color: white; }
-        .cancel-edit { background: #eee; color: #333; }
-
-        /* --- NEW PROFESSIONAL DELETE DIALOG STYLE --- */
-        #confirmDialog { display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s ease; }
-        #confirmDialog.open { display: flex; opacity: 1; }
-        .dialog-content { background: white; padding: 25px; border-radius: 20px; width: 80%; max-width: 350px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); transform: translateY(20px); transition: transform 0.2s ease; }
-        #confirmDialog.open .dialog-content { transform: translateY(0); }
-        .dialog-icon { font-size: 40px; color: #ff9800; margin-bottom: 15px; }
-        .dialog-title { font-size: 18px; font-weight: bold; color: #333; margin-bottom: 10px; }
-        .dialog-message { font-size: 14px; color: #666; margin-bottom: 25px; line-height: 1.5; }
-        .dialog-item-name { font-weight: bold; color: #ff5252; color: #ff5252; }
-        .dialog-btns { display: flex; gap: 10px; }
-        .dialog-btns button { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; font-size: 14px; transition: background 0.2s; }
-        .confirm-no { background: white; color: #333; border: 1px solid #ddd; }
-        .confirm-no:hover { background: #f5f5f5; }
-        .confirm-yes { background: #ff5252; color: white; }
-        .confirm-yes:hover { background: #e04848; }
+        /* Modern Dialogs */
+        .modal, #confirmDialog { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
+        .modal-content, .dialog-content { background: white; padding: 20px; border-radius: 15px; width: 85%; max-width: 350px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); text-align: center; }
+        .modal-content h3 { margin-top: 0; color: #075e54; }
+        .modal-content input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .modal-btns, .dialog-btns { display: flex; gap: 10px; margin-top: 15px; }
+        .modal-btns button, .dialog-btns button { flex: 1; padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
+        .save-edit, .confirm-yes { background: #075e54; color: white; }
+        .cancel-edit, .confirm-no { background: #eee; color: #333; }
+        .confirm-yes { background: #ff5252; }
 
         .user-total-info { background: #dcf8c6; padding: 10px; border-radius: 8px; font-weight: bold; text-align: center; color: #075e54; margin-bottom: 15px; border: 1px solid #c5e1a5; }
         .footer-fixed { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 15px; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); text-align: center; z-index: 1000; }
@@ -80,9 +63,9 @@
 
 <div id="confirmDialog">
     <div class="dialog-content">
-        <div class="dialog-icon">⚠️</div>
-        <div class="dialog-title">Warning ⚠️</div>
-        <div class="dialog-message">Are you sure to delete "<span id="confirmItemName" class="dialog-item-name"></span>"?<br><br><span style="color: #ff5252; font-size: 12px;"><span style="font-size: 16px;">🗑️</span> This action cannot be undone.</span></div>
+        <div style="font-size: 40px;">⚠️</div>
+        <h3 style="margin:10px 0;">Warning ⚠️</h3>
+        <p>Are you sure to delete "<span id="confirmItemName" style="font-weight:bold; color:#ff5252;"></span>"?</p>
         <div class="dialog-btns">
             <button class="confirm-no" onclick="closeConfirmDialog()">Cancel</button>
             <button class="confirm-yes" id="confirmDeleteBtn">Delete</button>
@@ -124,25 +107,8 @@
     <div id="listHaseeb"></div>
 </div>
 
-<div id="Arsalan" class="content">
-    <div class="input-card"><div class="input-row">
-        <input type="text" id="itemArsalan" placeholder="Saman ka naam">
-        <input type="number" id="priceArsalan" placeholder="Amount">
-        <button class="add-btn" onclick="addItem('Arsalan')">SAVE</button>
-    </div></div>
-    <div class="user-total-info">Total: SAR <span id="totalArsalan">0</span></div>
-    <div id="listArsalan"></div>
-</div>
-
-<div id="Aftab" class="content">
-    <div class="input-card"><div class="input-row">
-        <input type="text" id="itemAftab" placeholder="Saman ka naam">
-        <input type="number" id="priceAftab" placeholder="Amount">
-        <button class="add-btn" onclick="addItem('Aftab')">SAVE</button>
-    </div></div>
-    <div class="user-total-info">Total: SAR <span id="totalAftab">0</span></div>
-    <div id="listAftab"></div>
-</div>
+<div id="Arsalan" class="content"><div class="input-card"><div class="input-row"><input type="text" id="itemArsalan" placeholder="Saman ka naam"><input type="number" id="priceArsalan" placeholder="Amount"><button class="add-btn" onclick="addItem('Arsalan')">SAVE</button></div></div><div class="user-total-info">Total: SAR <span id="totalArsalan">0</span></div><div id="listArsalan"></div></div>
+<div id="Aftab" class="content"><div class="input-card"><div class="input-row"><input type="text" id="itemAftab" placeholder="Saman ka naam"><input type="number" id="priceAftab" placeholder="Amount"><button class="add-btn" onclick="addItem('Aftab')">SAVE</button></div></div><div class="user-total-info">Total: SAR <span id="totalAftab">0</span></div><div id="listAftab"></div></div>
 
 <div class="footer-fixed"><b style="color:#075e54">GRAND TOTAL: SAR <span id="grandTotal">0</span></b></div>
 
@@ -150,6 +116,20 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, query, orderBy, getDocs, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+  // --- GitHub Pages Optimized PWA Setup ---
+  const manifest = {
+    "name": "Kitchen Tracker Pro",
+    "short_name": "KitchenHisab",
+    "start_url": "/kitchen-hisab/", 
+    "display": "standalone",
+    "background_color": "#e5ddd5",
+    "theme_color": "#075e54",
+    "icons": [{"src": "https://cdn-icons-png.flaticon.com/512/3595/3595455.png", "sizes": "512x512", "type": "image/png"}]
+  };
+  const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+  document.querySelector('#manifest-placeholder').setAttribute('href', URL.createObjectURL(blob));
+
+  // --- Firebase Setup ---
   const firebaseConfig = {
     apiKey: "AIzaSyAywmVNaLkyudJelZ-Gdx6gL1hydzxe2cg",
     authDomain: "haseeb-984fc.firebaseapp.com",
@@ -165,153 +145,86 @@
   const colRef = collection(db, "kitchenExpenses");
 
   let currentEditId = null;
-  let currentDeleteId = null; // New for delete dialog
+  let currentDeleteId = null;
 
-  // --- Functions for Delete Dialog (⚠️ NEW) ---
+  // Modals Logic
   window.openConfirmDialog = (id, itemName) => {
       currentDeleteId = id;
       document.getElementById('confirmItemName').innerText = itemName;
       document.getElementById('confirmDialog').style.display = 'flex';
-      setTimeout(() => document.getElementById('confirmDialog').classList.add('open'), 10);
   };
-
-  window.closeConfirmDialog = () => {
-      document.getElementById('confirmDialog').classList.remove('open');
-      setTimeout(() => document.getElementById('confirmDialog').style.display = 'none', 200);
-      currentDeleteId = null;
-  };
-
+  window.closeConfirmDialog = () => { document.getElementById('confirmDialog').style.display = 'none'; };
   document.getElementById('confirmDeleteBtn').onclick = async () => {
-      if (currentDeleteId) {
-          await deleteDoc(doc(db, "kitchenExpenses", currentDeleteId));
-          closeConfirmDialog();
-      }
+      if (currentDeleteId) { await deleteDoc(doc(db, "kitchenExpenses", currentDeleteId)); closeConfirmDialog(); }
   };
 
-  // --- Functions for Edit Modal ---
   window.openEditModal = (id, name, amount) => {
       currentEditId = id;
       document.getElementById('editItemName').value = name;
       document.getElementById('editItemAmount').value = amount;
       document.getElementById('editModal').style.display = 'flex';
-      setTimeout(() => document.getElementById('editModal').classList.add('open'), 10);
   };
-
-  window.closeEditModal = () => {
-      document.getElementById('editModal').classList.remove('open');
-      setTimeout(() => document.getElementById('editModal').style.display = 'none', 300);
-      currentEditId = null;
-  };
-
+  window.closeEditModal = () => { document.getElementById('editModal').style.display = 'none'; };
   window.saveEdit = async () => {
-      const newName = document.getElementById('editItemName').value;
-      const newAmount = document.getElementById('editItemAmount').value;
-      if (newName && newAmount && currentEditId) {
-          const docRef = doc(db, "kitchenExpenses", currentEditId);
-          await updateDoc(docRef, { item: newName, price: Number(newAmount) });
-          closeEditModal();
-      }
+      const n = document.getElementById('editItemName').value, a = document.getElementById('editItemAmount').value;
+      if (n && a && currentEditId) { await updateDoc(doc(db, "kitchenExpenses", currentEditId), { item: n, price: Number(a) }); closeEditModal(); }
   };
 
-  // --- Rest of App Logic ---
+  // Main Logic
   const monthSelector = document.getElementById('monthFilter');
-  const getCurrentMonthTag = () => {
-    const d = new Date();
-    return `${d.toLocaleString('default', { month: 'short' })} ${d.getFullYear()}`;
-  };
-
+  const getM = () => { const d = new Date(); return `${d.toLocaleString('default', { month: 'short' })} ${d.getFullYear()}`; };
   for(let i=0; i<6; i++) {
     const d = new Date(); d.setMonth(d.getMonth() - i);
-    const mLabel = `${d.toLocaleString('default', { month: 'short' })} ${d.getFullYear()}`;
-    const opt = document.createElement('option'); opt.value = mLabel; opt.text = mLabel;
-    monthSelector.appendChild(opt);
+    const m = `${d.toLocaleString('default', { month: 'short' })} ${d.getFullYear()}`;
+    const opt = document.createElement('option'); opt.value = m; opt.text = m; monthSelector.appendChild(opt);
   }
 
-  window.openTab = (evt, name) => {
-    let content = document.getElementsByClassName("content"), tabs = document.getElementsByClassName("tab");
-    for (let i = 0; i < content.length; i++) content[i].classList.remove("active");
-    for (let i = 0; i < tabs.length; i++) tabs[i].classList.remove("active");
-    document.getElementById(name).classList.add("active");
-    evt.currentTarget.classList.add("active");
+  window.openTab = (e, n) => {
+    let c = document.getElementsByClassName("content"), t = document.getElementsByClassName("tab");
+    for (let i=0; i<c.length; i++) c[i].classList.remove("active");
+    for (let i=0; i<t.length; i++) t[i].classList.remove("active");
+    document.getElementById(n).classList.add("active"); e.currentTarget.classList.add("active");
   };
 
-  let unsubscribe;
+  let unsub;
   window.filterData = () => {
-    if (unsubscribe) unsubscribe();
-    const selectedMonth = monthSelector.value;
-    
-    unsubscribe = onSnapshot(query(colRef, orderBy("time", "desc")), (snapshot) => {
+    if (unsub) unsub();
+    unsub = onSnapshot(query(colRef, orderBy("time", "desc")), (snap) => {
       const users = ['Haseeb', 'Arsalan', 'Aftab'];
-      let grandTotal = 0;
-      users.forEach(user => {
-        const container = document.getElementById(`list${user}`);
-        const totalEl = document.getElementById(`total${user}`);
-        container.innerHTML = "";
-        let userTotal = 0, lastDate = "";
-
-        snapshot.forEach((docSnap) => {
-          const data = docSnap.data();
-          if(data.user === user && (data.monthLabel || "Mar 2026") === selectedMonth) {
-            userTotal += Number(data.price);
-            const dateStr = new Date(data.time).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
-            if (dateStr !== lastDate) {
-              container.innerHTML += `<div class="date-separator"><span>${dateStr}</span></div>`;
-              lastDate = dateStr;
-            }
-            const timeStr = new Date(data.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            
-            // --- UPDATED ROW HTML WITH MODERN DELETE DIALOG CALL ---
-            container.innerHTML += `<li>
-              <div class="item-info">
-                  <span class="item-name">${data.item}</span>
-                  <span class="item-price">SAR ${data.price}</span>
-                  <span class="item-time">${timeStr}</span>
-              </div>
-              <div class="btn-group">
-                  <button class="edit-btn" onclick="openEditModal('${docSnap.id}', '${data.item}', ${data.price})">EDIT</button>
-                  <button class="del-btn" onclick="openConfirmDialog('${docSnap.id}', '${data.item}')">DEL</button>
-              </div>
-            </li>`;
+      let gTotal = 0;
+      users.forEach(u => {
+        const cont = document.getElementById(`list${u}`), totEl = document.getElementById(`total${u}`);
+        cont.innerHTML = ""; let uTotal = 0, lastD = "";
+        snap.forEach(ds => {
+          const d = ds.data();
+          if(d.user === u && (d.monthLabel || "Mar 2026") === monthSelector.value) {
+            uTotal += Number(d.price);
+            const dsStr = new Date(d.time).toLocaleDateString('en-GB', {day:'2-digit', month:'short'});
+            if(dsStr !== lastD) { cont.innerHTML += `<div class="date-separator"><span>${dsStr}</span></div>`; lastD = dsStr; }
+            cont.innerHTML += `<li><div class="item-info"><span class="item-name">${d.item}</span><span class="item-price">SAR ${d.price}</span><span class="item-time">${new Date(d.time).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</span></div><div class="btn-group"><button class="edit-btn" onclick="openEditModal('${ds.id}','${d.item}',${d.price})">EDIT</button><button class="del-btn" onclick="openConfirmDialog('${ds.id}','${d.item}')">DEL</button></div></li>`;
           }
         });
-        totalEl.innerText = userTotal;
-        grandTotal += userTotal;
+        totEl.innerText = uTotal; gTotal += uTotal;
       });
-      document.getElementById('grandTotal').innerText = grandTotal;
+      document.getElementById('grandTotal').innerText = gTotal;
     });
   };
 
-  window.addItem = async (user) => {
-    const item = document.getElementById(`item${user}`).value, price = document.getElementById(`price${user}`).value;
-    if(!item || !price) return;
-    await addDoc(colRef, { user, item, price: Number(price), time: Date.now(), monthLabel: getCurrentMonthTag() });
-    document.getElementById(`item${user}`).value = ""; document.getElementById(`price${user}`).value = "";
+  window.addItem = async (u) => {
+    const i = document.getElementById(`item${u}`).value, p = document.getElementById(`price${u}`).value;
+    if(i && p) { await addDoc(colRef, { user: u, item: i, price: Number(p), time: Date.now(), monthLabel: getM() }); document.getElementById(`item${u}`).value=""; document.getElementById(`price${u}`).value=""; }
   };
 
   window.generatePDF = async () => {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    const selectedMonth = monthSelector.value;
-    const snapshot = await getDocs(query(colRef, orderBy("time", "asc")));
-    let startY = 25;
-    doc.text(`Kitchen Report - ${selectedMonth}`, 14, 15);
-    ['Haseeb', 'Arsalan', 'Aftab'].forEach(user => {
-        const rows = []; let total = 0;
-        snapshot.forEach(d => {
-            const data = d.data();
-            if(data.user === user && (data.monthLabel || "Mar 2026") === selectedMonth) {
-                rows.push([new Date(data.time).toLocaleDateString('en-GB'), data.item, `SAR ${data.price}`]);
-                total += Number(data.price);
-            }
-        });
-        if(rows.length) {
-            doc.text(`${user.toUpperCase()}`, 14, startY);
-            doc.autoTable({ startY: startY + 2, head: [['Date', 'Item', 'Amount']], body: rows });
-            startY = doc.lastAutoTable.finalY + 10;
-            doc.text(`Total: SAR ${total}`, 140, startY - 5);
-        }
+    const { jsPDF } = window.jspdf; const docP = new jsPDF();
+    const snap = await getDocs(query(colRef, orderBy("time", "asc")));
+    let y = 25; docP.text(`Kitchen Report - ${monthSelector.value}`, 14, 15);
+    ['Haseeb', 'Arsalan', 'Aftab'].forEach(u => {
+        const r = []; let t = 0;
+        snap.forEach(d => { const da = d.data(); if(da.user===u && (da.monthLabel||"Mar 2026")===monthSelector.value) { r.push([new Date(da.time).toLocaleDateString('en-GB'), da.item, `SAR ${da.price}`]); t+=Number(da.price); } });
+        if(r.length) { docP.text(u.toUpperCase(), 14, y); docP.autoTable({startY:y+2, head:[['Date','Item','Amount']], body:r}); y=docP.lastAutoTable.finalY+10; docP.text(`Total: SAR ${t}`, 140, y-5); }
     });
-    doc.save(`Report_${selectedMonth}.pdf`);
+    docP.save(`Kitchen_${monthSelector.value}.pdf`);
   };
 
   filterData();
