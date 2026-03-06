@@ -3,91 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kitchen Tracker Pro - Secure Edition</title>
+    <title>Kitchen Tracker Pro</title>
     
-    <meta name="theme-color" content="#075e54">
-    <link rel="manifest" id="manifest-placeholder">
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     
     <style>
-        body { font-family: 'Segoe UI', Roboto, sans-serif; background: #e5ddd5; margin: 0; padding: 0; overflow-x: hidden; }
+        body { font-family: 'Segoe UI', sans-serif; background: #e5ddd5; margin: 0; padding: 0; }
+        
+        /* Login Page Styling */
         #loginPage { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #075e54; z-index: 5000; display: flex; align-items: center; justify-content: center; color: white; }
-        .login-card { background: white; padding: 30px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; color: #333; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
-        .login-card input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        .login-card { background: white; padding: 30px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; color: #333; }
+        .login-card input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
         .login-btn { width: 100%; background: #25d366; color: white; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+
+        /* Main App Styling (Back to Original) */
         #mainApp { display: none; }
-        .header { background: #075e54; color: white; padding: 12px 15px; position: sticky; top: 0; z-index: 100; display: flex; align-items: center; gap: 10px; }
-        .tabs { display: flex; background: #075e54; color: #b1d4d0; position: sticky; top: 50px; z-index: 100; }
-        .tab { flex: 1; text-align: center; padding: 14px 0; font-weight: bold; cursor: pointer; border-bottom: 3px solid transparent; }
-        .tab.active { color: white; border-bottom: 3px solid #fff; }
-        .content { display: none; padding: 15px; padding-bottom: 110px; }
+        .header { background: #075e54; color: white; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+        .tabs { display: flex; background: #075e54; position: sticky; top: 45px; z-index: 100; }
+        .tab { flex: 1; text-align: center; padding: 12px; color: #b1d4d0; font-weight: bold; cursor: pointer; border-bottom: 3px solid transparent; }
+        .tab.active { color: white; border-bottom: 3px solid white; }
+        .content { display: none; padding: 15px; padding-bottom: 80px; }
         .content.active { display: block; }
-        .input-card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; }
-        .user-total-info { background: #dcf8c6; padding: 10px; border-radius: 8px; font-weight: bold; text-align: center; margin-bottom: 15px; }
-        li { background: white; padding: 10px; margin-bottom: 8px; border-radius: 10px; display: flex; align-items: center; border-left: 5px solid #075e54; }
-        .footer-fixed { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 15px; text-align: center; z-index: 1000; }
-        .modal { display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); align-items: center; justify-content: center; }
-        .modal-content { background: white; padding: 25px; border-radius: 15px; width: 85%; max-width: 380px; text-align: center; }
-        .sidenav { height: 100%; width: 0; position: fixed; z-index: 2000; top: 0; left: 0; background: white; transition: 0.3s; padding-top: 60px; box-shadow: 2px 0 10px rgba(0,0,0,0.2); overflow-x: hidden; }
-        .sidenav a { padding: 15px 25px; text-decoration: none; font-size: 18px; color: #333; display: block; border-bottom: 1px solid #eee; }
+        .input-card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .input-card input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        .user-total-info { background: #dcf8c6; padding: 10px; border-radius: 8px; text-align: center; font-weight: bold; margin-bottom: 10px; color: #075e54; }
+        li { background: white; padding: 12px; margin-bottom: 8px; border-radius: 10px; display: flex; justify-content: space-between; border-left: 5px solid #075e54; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .footer-fixed { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 15px; text-align: center; border-top: 1px solid #ddd; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div id="loginPage">
     <div class="login-card">
-        <h2>Kitchen Login</h2>
+        <h2 style="color:#075e54">Kitchen Login</h2>
         <input type="email" id="loginEmail" placeholder="Email Address">
         <input type="password" id="loginPassword" placeholder="Password">
         <button class="login-btn" onclick="handleLogin()">Login</button>
-        <p id="loginError" style="color:red; font-size:12px; margin-top:10px; display:none;">Invalid Email or Password</p>
+        <p id="loginError" style="color:red; font-size:12px; margin-top:10px; display:none;">Ghalat Email ya Password!</p>
     </div>
 </div>
 
 <div id="mainApp">
-    <div id="mySidenav" class="sidenav">
-        <a href="javascript:void(0)" onclick="closeNav()" style="font-size:30px; color:#075e54;">&times;</a>
-        <div id="userWelcome" style="padding:20px; font-weight:bold; color:#075e54; border-bottom:2px solid #eee;">Hi, User</div>
-        <a href="#" onclick="sendPasswordReset()">⚙️ Change Password</a>
-        <a href="#" onclick="handleLogout()" style="color:red;">🚪 Logout</a>
-    </div>
-
     <div class="header">
-        <span onclick="openNav()" style="font-size:24px; cursor:pointer;">&#9776;</span>
-        <h1 style="flex-grow:1; font-size:16px; margin:0;">Kitchen Hisab 🥘</h1>
-        <select id="monthFilter" onchange="filterData()" style="background:#128c7e; color:white; padding:5px; border-radius:5px;"></select>
+        <h1 style="font-size: 18px; margin: 0;">Kitchen Hisab 🥘</h1>
+        <div style="display: flex; gap: 8px;">
+            <select id="monthFilter" onchange="filterData()" style="padding: 5px; border-radius: 5px; border: none;"></select>
+            <button onclick="generatePDF()" style="background: #25d366; color: white; border: none; padding: 5px 10px; border-radius: 5px; font-weight: bold;">PDF</button>
+            <button onclick="handleLogout()" style="background: #e53935; color: white; border: none; padding: 5px 10px; border-radius: 5px; font-weight: bold;">Logout</button>
+        </div>
     </div>
 
     <div class="tabs">
-        <div class="tab" id="tabHaseeb" onclick="openTab(event, 'Haseeb')">Haseeb</div>
-        <div class="tab" id="tabArsalan" onclick="openTab(event, 'Arsalan')">Arsalan</div>
-        <div class="tab" id="tabAftab" onclick="openTab(event, 'Aftab')">Aftab</div>
+        <div class="tab active" id="tabHaseeb" onclick="openTab(event, 'Haseeb')">HASEEB</div>
+        <div class="tab" id="tabArsalan" onclick="openTab(event, 'Arsalan')">ARSALAN</div>
+        <div class="tab" id="tabAftab" onclick="openTab(event, 'Aftab')">AFTAB</div>
     </div>
 
-    <div id="Haseeb" class="content">
-        <div class="input-card"><input type="text" id="itemHaseeb" placeholder="Saman" style="width:100%; margin-bottom:10px; padding:10px;"><input type="number" id="priceHaseeb" placeholder="Amount" style="width:100%; margin-bottom:10px; padding:10px;"><button onclick="addItem('Haseeb')" style="width:100%; background:#25d366; color:white; padding:12px; border:none; border-radius:8px;">SAVE</button></div>
+    <div id="Haseeb" class="content active">
+        <div class="input-card">
+            <input type="text" id="itemHaseeb" placeholder="Saman ka naam">
+            <input type="number" id="priceHaseeb" placeholder="Amount">
+            <button onclick="addItem('Haseeb')" style="width:100%; background:#25d366; color:white; padding:12px; border:none; border-radius:8px; font-weight:bold;">SAVE</button>
+        </div>
         <div class="user-total-info">Total: SAR <span id="totalHaseeb">0</span></div>
         <div id="listHaseeb"></div>
     </div>
+
     <div id="Arsalan" class="content">
-        <div class="input-card"><input type="text" id="itemArsalan" placeholder="Saman" style="width:100%; margin-bottom:10px; padding:10px;"><input type="number" id="priceArsalan" placeholder="Amount" style="width:100%; margin-bottom:10px; padding:10px;"><button onclick="addItem('Arsalan')" style="width:100%; background:#25d366; color:white; padding:12px; border:none; border-radius:8px;">SAVE</button></div>
+        <div class="input-card">
+            <input type="text" id="itemArsalan" placeholder="Saman ka naam">
+            <input type="number" id="priceArsalan" placeholder="Amount">
+            <button onclick="addItem('Arsalan')" style="width:100%; background:#25d366; color:white; padding:12px; border:none; border-radius:8px; font-weight:bold;">SAVE</button>
+        </div>
         <div class="user-total-info">Total: SAR <span id="totalArsalan">0</span></div>
         <div id="listArsalan"></div>
     </div>
+
     <div id="Aftab" class="content">
-        <div class="input-card"><input type="text" id="itemAftab" placeholder="Saman" style="width:100%; margin-bottom:10px; padding:10px;"><input type="number" id="priceAftab" placeholder="Amount" style="width:100%; margin-bottom:10px; padding:10px;"><button onclick="addItem('Aftab')" style="width:100%; background:#25d366; color:white; padding:12px; border:none; border-radius:8px;">SAVE</button></div>
+        <div class="input-card">
+            <input type="text" id="itemAftab" placeholder="Saman ka naam">
+            <input type="number" id="priceAftab" placeholder="Amount">
+            <button onclick="addItem('Aftab')" style="width:100%; background:#25d366; color:white; padding:12px; border:none; border-radius:8px; font-weight:bold;">SAVE</button>
+        </div>
         <div class="user-total-info">Total: SAR <span id="totalAftab">0</span></div>
         <div id="listAftab"></div>
     </div>
-    <div class="footer-fixed"><b>GRAND TOTAL: SAR <span id="grandTotal">0</span></b></div>
+
+    <div class="footer-fixed">GRAND TOTAL: SAR <span id="grandTotal">0</span></div>
 </div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-  import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, getDocs, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAywmVNaLkyudJelZ-Gdx6gL1hydzxe2cg",
@@ -120,9 +129,6 @@
     if (user) {
       document.getElementById('loginPage').style.display = 'none';
       document.getElementById('mainApp').style.display = 'block';
-      const name = userEmails[user.email] || "User";
-      document.getElementById('userWelcome').innerText = "Hi, " + name;
-      document.getElementById('tab' + name).click();
       filterData();
     } else {
       document.getElementById('loginPage').style.display = 'flex';
@@ -131,8 +137,6 @@
   });
 
   window.handleLogout = () => signOut(auth);
-  window.openNav = () => document.getElementById("mySidenav").style.width = "260px";
-  window.closeNav = () => document.getElementById("mySidenav").style.width = "0";
 
   const monthSelector = document.getElementById('monthFilter');
   for(let i=0; i<6; i++){
@@ -151,7 +155,7 @@
                   const d = ds.data();
                   if(d.user === u && (d.monthLabel || "Mar 2026") === monthSelector.value) {
                       ut += Number(d.price);
-                      cont.innerHTML += `<li><div style="flex:1">${d.item}</div><div style="font-weight:bold; color:#075e54">SAR ${d.price}</div></li>`;
+                      cont.innerHTML += `<li><span>${d.item}</span> <b>SAR ${d.price}</b></li>`;
                   }
               });
               document.getElementById(`total${u}`).innerText = ut; gt += ut;
@@ -170,9 +174,16 @@
 
   window.openTab = (e, n) => {
     let c = document.getElementsByClassName("content"), t = document.getElementsByClassName("tab");
-    for (let i=0; i<c.length; i++) c[i].classList.remove("active");
-    for (let i=0; i<t.length; i++) t[i].classList.remove("active");
+    for (let i=0; i<c.length; i++) { c[i].classList.remove("active"); t[i].classList.remove("active"); }
     document.getElementById(n).classList.add("active"); e.currentTarget.classList.add("active");
+  };
+
+  window.generatePDF = () => {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.text("Kitchen Expenses Report - " + monthSelector.value, 14, 15);
+    // PDF generation logic here...
+    doc.save(`Kitchen_Report_${monthSelector.value}.pdf`);
   };
 </script>
 </body>
