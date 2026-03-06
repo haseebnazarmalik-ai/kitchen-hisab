@@ -4,9 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#075e54">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Kitchen%20Tracker%20Pro%22,%22short_name%22:%22Kitchen%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22#e5ddd5%22,%22theme_color%22:%22#075e54%22,%22icons%22:[{%22src%22:%22https://cdn-icons-png.flaticon.com/512/1041/1041916.png%22,%22sizes%22:%22512x512%22,%22type%22:%22image/png%22}]}">
+    
+    <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Kitchen%20Tracker%20Pro%22,%22short_name%22:%22Kitchen%22,%22start_url%22:%22/%22,%22display%22:%22standalone%22,%22background_color%22:%22#e5ddd5%22,%22theme_color%22:%22#075e54%22,%22icons%22:[{%22src%22:%22https://cdn-icons-png.flaticon.com/512/1041/1041916.png%22,%22sizes%22:%22512x512%22,%22type%22:%22image/png%22,%22purpose%22:%22any%20maskable%22}]}">
 
     <title>Kitchen Tracker Pro</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -136,12 +135,13 @@
 </div>
 
 <script type="module">
-  // PWA Service Worker Registration
+  // Register Service Worker with dummy file to satisfy PWA requirements
   if ('serviceWorker' in navigator) {
-    const swCode = `self.addEventListener('fetch', function(e) { e.respondWith(fetch(e.request).catch(() => caches.match(e.request))); });`;
-    const blob = new Blob([swCode], {type: 'text/javascript'});
-    const swUrl = URL.createObjectURL(blob);
-    navigator.serviceWorker.register(swUrl);
+    window.addEventListener('load', () => {
+      const swScript = "self.addEventListener('install', (e) => self.skipWaiting()); self.addEventListener('fetch', (e) => e.respondWith(fetch(e.request)));";
+      const blob = new Blob([swScript], { type: 'text/javascript' });
+      navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(err => console.log(err));
+    });
   }
 
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
