@@ -86,17 +86,17 @@
     </div>
 
     <div id="Haseeb" class="content">
-        <div class="input-card" id="inputHaseeb"><input type="text" id="itemHaseeb" placeholder="Saman ka naam"><input type="number" id="priceHaseeb" placeholder="Amount"><button class="save-btn" onclick="addItem('Haseeb')">SAVE</button></div>
+        <div class="input-card" id="inputHaseeb"><input type="text" id="itemHaseeb" placeholder="Material"><input type="number" id="priceHaseeb" placeholder="Amount"><button class="save-btn" onclick="addItem('Haseeb')">SAVE</button></div>
         <div class="user-total-info">Total: SAR <span id="totalHaseeb">0</span></div>
         <div id="listHaseeb"></div>
     </div>
     <div id="Arsalan" class="content">
-        <div class="input-card" id="inputArsalan"><input type="text" id="itemArsalan" placeholder="Saman ka naam"><input type="number" id="priceArsalan" placeholder="Amount"><button class="save-btn" onclick="addItem('Arsalan')">SAVE</button></div>
+        <div class="input-card" id="inputArsalan"><input type="text" id="itemArsalan" placeholder="Material"><input type="number" id="priceArsalan" placeholder="Amount"><button class="save-btn" onclick="addItem('Arsalan')">SAVE</button></div>
         <div class="user-total-info">Total: SAR <span id="totalArsalan">0</span></div>
         <div id="listArsalan"></div>
     </div>
     <div id="Aftab" class="content">
-        <div class="input-card" id="inputAftab"><input type="text" id="itemAftab" placeholder="Saman ka naam"><input type="number" id="priceAftab" placeholder="Amount"><button class="save-btn" onclick="addItem('Aftab')">SAVE</button></div>
+        <div class="input-card" id="inputAftab"><input type="text" id="itemAftab" placeholder="Material"><input type="number" id="priceAftab" placeholder="Amount"><button class="save-btn" onclick="addItem('Aftab')">SAVE</button></div>
         <div class="user-total-info">Total: SAR <span id="totalAftab">0</span></div>
         <div id="listAftab"></div>
     </div>
@@ -110,7 +110,7 @@
         <input type="text" id="editItemName"><input type="number" id="editItemPrice">
         <div class="modal-btns">
             <button class="btn-cancel" onclick="closeEditModal()">Cancel</button>
-            <button class="btn-confirm-edit" id="confirmUpdate">Save</button>
+            <button class="btn-confirm-edit" id="confirmUpdate">Update</button>
         </div>
     </div>
 </div>
@@ -118,8 +118,8 @@
 <div id="deleteModal" class="modal-overlay">
     <div class="modal-box">
         <h3>Delete?</h3>
-        <p>Kya aap waqai is entry ko khatam karna chahte hain?</p>
-        <div class="modal-btns"><button class="btn-cancel" onclick="closeDelModal()">Nahi</button><button class="btn-confirm-del" id="confirmDelete">Haan, Delete</button></div>
+        <p>Are you sure Delete this item?</p>
+        <div class="modal-btns"><button class="btn-cancel" onclick="closeDelModal()">No</button><button class="btn-confirm-del" id="confirmDelete">Yes, Delete</button></div>
     </div>
 </div>
 
@@ -270,3 +270,4 @@
 </script>
 </body>
 </html>
+
