@@ -85,18 +85,20 @@
         <div class="tab" id="tabAftab" onclick="openTab(event, 'Aftab')">AFTAB</div>
     </div>
 
+    <datalist id="materialSuggestions"></datalist>
+
     <div id="Haseeb" class="content">
-        <div class="input-card" id="inputHaseeb"><input type="text" id="itemHaseeb" placeholder="Material"><input type="number" id="priceHaseeb" placeholder="Amount"><button class="save-btn" onclick="addItem('Haseeb')">SAVE</button></div>
+        <div class="input-card" id="inputHaseeb"><input type="text" id="itemHaseeb" placeholder="Material" list="materialSuggestions"><input type="number" id="priceHaseeb" placeholder="Amount"><button class="save-btn" onclick="addItem('Haseeb')">SAVE</button></div>
         <div class="user-total-info">Total: SAR <span id="totalHaseeb">0</span></div>
         <div id="listHaseeb"></div>
     </div>
     <div id="Arsalan" class="content">
-        <div class="input-card" id="inputArsalan"><input type="text" id="itemArsalan" placeholder="Material"><input type="number" id="priceArsalan" placeholder="Amount"><button class="save-btn" onclick="addItem('Arsalan')">SAVE</button></div>
+        <div class="input-card" id="inputArsalan"><input type="text" id="itemArsalan" placeholder="Material" list="materialSuggestions"><input type="number" id="priceArsalan" placeholder="Amount"><button class="save-btn" onclick="addItem('Arsalan')">SAVE</button></div>
         <div class="user-total-info">Total: SAR <span id="totalArsalan">0</span></div>
         <div id="listArsalan"></div>
     </div>
     <div id="Aftab" class="content">
-        <div class="input-card" id="inputAftab"><input type="text" id="itemAftab" placeholder="Material"><input type="number" id="priceAftab" placeholder="Amount"><button class="save-btn" onclick="addItem('Aftab')">SAVE</button></div>
+        <div class="input-card" id="inputAftab"><input type="text" id="itemAftab" placeholder="Material" list="materialSuggestions"><input type="number" id="priceAftab" placeholder="Amount"><button class="save-btn" onclick="addItem('Aftab')">SAVE</button></div>
         <div class="user-total-info">Total: SAR <span id="totalAftab">0</span></div>
         <div id="listAftab"></div>
     </div>
@@ -107,7 +109,7 @@
 <div id="editModal" class="modal-overlay">
     <div class="modal-box">
         <h3>Edit Item</h3>
-        <input type="text" id="editItemName"><input type="number" id="editItemPrice">
+        <input type="text" id="editItemName" list="materialSuggestions"><input type="number" id="editItemPrice">
         <div class="modal-btns">
             <button class="btn-cancel" onclick="closeEditModal()">Cancel</button>
             <button class="btn-confirm-edit" id="confirmUpdate">Update</button>
@@ -171,9 +173,25 @@
       const opt = document.createElement('option'); opt.value = m; opt.text = m; monthSelector.appendChild(opt);
   }
 
+  // Update suggestions based on database items
+  function updateSuggestions(snap) {
+      const datalist = document.getElementById('materialSuggestions');
+      const uniqueItems = new Set();
+      snap.forEach(ds => { uniqueItems.add(ds.data().item); });
+      
+      datalist.innerHTML = "";
+      Array.from(uniqueItems).sort().forEach(item => {
+          const opt = document.createElement('option');
+          opt.value = item;
+          datalist.appendChild(opt);
+      });
+  }
+
   window.filterData = () => {
     onSnapshot(query(colRef, orderBy("time", "desc")), (snap) => {
       let gt = 0; allEntries = [];
+      updateSuggestions(snap); // Refresh library suggestions
+
       ['Haseeb', 'Arsalan', 'Aftab'].forEach(u => {
         const cont = document.getElementById(`list${u}`); 
         let ut = 0; cont.innerHTML = ""; 
@@ -195,12 +213,15 @@
           groups[label].items.forEach(item => {
             cont.innerHTML += `<li><div class="item-info"><span class="item-name">${item.item}</span><span class="item-time">${new Date(item.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span></div><div class="item-amount">SAR ${item.price}</div><div class="action-btns">${(u === currentUserRole) ? `<button class="edit-text" onclick="openEditModal('${item.id}', '${item.item}', ${item.price})">Edit</button><button class="delete-text" onclick="openDelModal('${item.id}')">Delete</button>` : ''}</div></li>`;
           });
+          
           if(groups[label].items.length > 1) {
             cont.innerHTML += `<div style="text-align: right; padding: 0 15px 10px; font-size: 12px; font-weight: bold; color: #075e54;">Day Total: SAR ${groups[label].total}</div>`;
           }
         }
+        
         document.getElementById(`total${u}`).innerText = ut; gt += ut;
       });
+      
       allEntries = [];
       snap.forEach(ds => { if((ds.data().monthLabel || "Mar 2026") === monthSelector.value) allEntries.push({...ds.data()}); });
       document.getElementById('grandTotal').innerText = gt;
