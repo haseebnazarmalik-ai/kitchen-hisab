@@ -144,7 +144,7 @@
   const colRef = collection(db, "kitchenExpenses");
 
   const userEmails = { "haseebnazar.malik@gmail.com": "Haseeb", "arsalan@gmail.com": "Arsalan", "aftab@gmail.com": "Aftab" };
-  let currentUserRole = "", itemToDelete = null, itemToEdit = null;
+  let currentUserRole = "", itemToDelete = null, itemToEdit = null, oldItemName = "", oldItemPrice = 0;
   let allEntries = [];
   let isInitialLoad = true;
 
@@ -235,7 +235,12 @@
           cont.innerHTML += `<div class="date-separator"><span>${label}</span></div>`;
           groups[label].items.forEach(item => {
             const timeStr = new Date(item.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            const editedTag = item.edited ? `<span style="font-size: 11px; margin-left: 5px; font-weight: normal; color: #777;">Edited</span>` : '';
+            let editedTag = '';
+            if(item.editType === 'both' || item.editType === 'amount') {
+                editedTag = `<span style="font-size: 11px; margin-left: 5px; font-weight: normal; color: #777;">Edited(amount)</span>`;
+            } else if (item.editType === 'name') {
+                editedTag = `<span style="font-size: 11px; margin-left: 5px; font-weight: normal; color: #777;">Edited</span>`;
+            }
             cont.innerHTML += `<li><div class="item-info"><span class="item-name">${item.item}</span><span class="item-time">${timeStr}${editedTag}</span></div><div class="item-amount">SAR ${item.price}</div><div class="action-btns">${(u === currentUserRole) ? `<button class="edit-text" onclick="openEditModal('${item.id}', '${item.item}', ${item.price})">Edit</button><button class="delete-text" onclick="openDelModal('${item.id}')">Delete</button>` : ''}</div></li>`;
           });
           if(groups[label].items.length > 1) {
@@ -273,7 +278,7 @@
     if(!p) { showToast("please write amount"); return; }
     showLoader("Material Saving...");
     try {
-      await addDoc(colRef, { user: u, item: i, price: Number(p), time: Date.now(), monthLabel: monthSelector.value, edited: false });
+      await addDoc(colRef, { user: u, item: i, price: Number(p), time: Date.now(), monthLabel: monthSelector.value, editType: 'none' });
       document.getElementById(`item${u}`).value = ""; document.getElementById(`price${u}`).value = "";
       hideLoader();
     } catch { hideLoader(); showToast("Error saving data"); }
@@ -291,7 +296,7 @@
       if(userItems.length > 0) {
         docPdf.setFontSize(14); docPdf.setTextColor(0);
         docPdf.text(`${u.toUpperCase()} LIST:`, 14, currentY + 5);
-        const rows = userItems.map(d => [new Date(d.time).toLocaleDateString('en-GB'), d.item + (d.edited ? " (Edited)" : ""), `SAR ${d.price}`]);
+        const rows = userItems.map(d => [new Date(d.time).toLocaleDateString('en-GB'), d.item + (d.editType !== 'none' ? " (Edited)" : ""), `SAR ${d.price}`]);
         const userTotal = userItems.reduce((s, d) => s + Number(d.price), 0);
         docPdf.autoTable({ head: [['Date', 'Item', 'Amount']], body: rows, startY: currentY + 8, theme: 'grid', headStyles: { fillColor: [7, 94, 84] }, foot: [['', 'TOTAL', `SAR ${userTotal}`]], footStyles: { fillColor: [220, 248, 198], textColor: [0], fontStyle: 'bold' } });
         currentY = docPdf.lastAutoTable.finalY + 10;
@@ -302,15 +307,36 @@
     setTimeout(() => { docPdf.save(`Kitchen_Report_${monthSelector.value}.pdf`); hideLoader(); showToast("Check download file in download folder"); }, 1500);
   };
 
-  window.openEditModal = (id, name, price) => { itemToEdit = id; document.getElementById('editItemName').value = name; document.getElementById('editItemPrice').value = price; document.getElementById('editModal').style.display = 'flex'; };
+  window.openEditModal = (id, name, price) => { 
+    itemToEdit = id; 
+    oldItemName = name; 
+    oldItemPrice = Number(price); 
+    document.getElementById('editItemName').value = name; 
+    document.getElementById('editItemPrice').value = price; 
+    document.getElementById('editModal').style.display = 'flex'; 
+  };
+  
   window.closeEditModal = () => { document.getElementById('editModal').style.display = 'none'; };
   
   document.getElementById('confirmUpdate').onclick = async () => { 
-    const n = document.getElementById('editItemName').value, p = document.getElementById('editItemPrice').value; 
+    const n = document.getElementById('editItemName').value, p = Number(document.getElementById('editItemPrice').value); 
     if(itemToEdit && n && p) { 
+        let type = 'none';
+        const nameChanged = (n !== oldItemName);
+        const priceChanged = (p !== oldItemPrice);
+
+        if (nameChanged && priceChanged) type = 'both';
+        else if (priceChanged) type = 'amount';
+        else if (nameChanged) type = 'name';
+
         const id = itemToEdit; 
         closeEditModal(); 
-        await updateDoc(doc(db, "kitchenExpenses", id), { item: n, price: Number(p), edited: true }); 
+        if (type !== 'none') {
+            await updateDoc(doc(db, "kitchenExpenses", id), { item: n, price: p, editType: type }); 
+        } else {
+            // If nothing changed, just close (or you can still update values to be safe)
+            await updateDoc(doc(db, "kitchenExpenses", id), { item: n, price: p }); 
+        }
     } 
   };
 
