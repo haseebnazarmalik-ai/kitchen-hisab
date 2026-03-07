@@ -57,8 +57,8 @@
 </head>
 <body>
 
-<div id="loaderOverlay"><div class="spinner"></div><p style="color: #075e54; font-weight: bold; margin-top: 10px;">Generating Sorted Report...</p></div>
-<div id="toast">Check download file in download folder</div>
+<div id="loaderOverlay"><div class="spinner"></div><p id="loaderText" style="color: #075e54; font-weight: bold; margin-top: 10px;">Generating Sorted Report...</p></div>
+<div id="toast"></div>
 
 <div id="loginPage">
     <div class="login-card">
@@ -147,6 +147,22 @@
   let currentUserRole = "", itemToDelete = null, itemToEdit = null;
   let allEntries = [];
 
+  window.showToast = (msg) => {
+    const x = document.getElementById("toast");
+    x.innerText = msg;
+    x.className = "show";
+    setTimeout(() => { x.className = ""; }, 3000);
+  };
+
+  window.showLoader = (text) => {
+    document.getElementById('loaderText').innerText = text;
+    document.getElementById('loaderOverlay').style.display = 'flex';
+  };
+
+  window.hideLoader = () => {
+    document.getElementById('loaderOverlay').style.display = 'none';
+  };
+
   onAuthStateChanged(auth, (user) => {
     if (user) {
       currentUserRole = userEmails[user.email] || "Viewer";
@@ -162,7 +178,18 @@
 
   window.handleLogin = async () => {
     const e = document.getElementById('loginEmail').value, p = document.getElementById('loginPassword').value;
-    try { await signInWithEmailAndPassword(auth, e, p); } catch { alert("Login Fail!"); }
+    if(!e || !p) { showToast("Please enter email and password"); return; }
+    
+    showLoader("Logging in...");
+    try { 
+      const userCredential = await signInWithEmailAndPassword(auth, e, p);
+      const name = userEmails[userCredential.user.email] || "User";
+      hideLoader();
+      showToast(`Welcome, ${name}! 🥘`);
+    } catch { 
+      hideLoader();
+      showToast("Wrong email or password.");
+    }
   };
   window.handleLogout = () => signOut(auth);
 
@@ -173,12 +200,10 @@
       const opt = document.createElement('option'); opt.value = m; opt.text = m; monthSelector.appendChild(opt);
   }
 
-  // Update suggestions based on database items
   function updateSuggestions(snap) {
       const datalist = document.getElementById('materialSuggestions');
       const uniqueItems = new Set();
       snap.forEach(ds => { uniqueItems.add(ds.data().item); });
-      
       datalist.innerHTML = "";
       Array.from(uniqueItems).sort().forEach(item => {
           const opt = document.createElement('option');
@@ -190,12 +215,10 @@
   window.filterData = () => {
     onSnapshot(query(colRef, orderBy("time", "desc")), (snap) => {
       let gt = 0; allEntries = [];
-      updateSuggestions(snap); // Refresh library suggestions
-
+      updateSuggestions(snap);
       ['Haseeb', 'Arsalan', 'Aftab'].forEach(u => {
         const cont = document.getElementById(`list${u}`); 
         let ut = 0; cont.innerHTML = ""; 
-        
         let groups = {};
         snap.forEach(ds => {
           const d = ds.data();
@@ -207,21 +230,17 @@
             ut += Number(d.price);
           }
         });
-
         for (const label in groups) {
           cont.innerHTML += `<div class="date-separator"><span>${label}</span></div>`;
           groups[label].items.forEach(item => {
             cont.innerHTML += `<li><div class="item-info"><span class="item-name">${item.item}</span><span class="item-time">${new Date(item.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span></div><div class="item-amount">SAR ${item.price}</div><div class="action-btns">${(u === currentUserRole) ? `<button class="edit-text" onclick="openEditModal('${item.id}', '${item.item}', ${item.price})">Edit</button><button class="delete-text" onclick="openDelModal('${item.id}')">Delete</button>` : ''}</div></li>`;
           });
-          
           if(groups[label].items.length > 1) {
             cont.innerHTML += `<div style="text-align: right; padding: 0 15px 10px; font-size: 12px; font-weight: bold; color: #075e54;">Day Total: SAR ${groups[label].total}</div>`;
           }
         }
-        
         document.getElementById(`total${u}`).innerText = ut; gt += ut;
       });
-      
       allEntries = [];
       snap.forEach(ds => { if((ds.data().monthLabel || "Mar 2026") === monthSelector.value) allEntries.push({...ds.data()}); });
       document.getElementById('grandTotal').innerText = gt;
@@ -237,7 +256,6 @@
     const nowDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const diffTime = nowDate - dDate;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
     if (diffDays === 0) return "Today";
     if (diffDays === 1) return "Yesterday";
     if (diffDays > 1 && diffDays <= 5) return d.toLocaleDateString('en-GB', { weekday: 'long' });
@@ -246,12 +264,26 @@
 
   window.addItem = async (u) => {
     const i = document.getElementById(`item${u}`).value, p = document.getElementById(`price${u}`).value;
-    if(i && p) { await addDoc(colRef, { user: u, item: i, price: Number(p), time: Date.now(), monthLabel: monthSelector.value }); document.getElementById(`item${u}`).value = ""; document.getElementById(`price${u}`).value = ""; }
+    
+    if(!i && !p) { showToast("please write material and amount"); return; }
+    if(!i) { showToast("please write material"); return; }
+    if(!p) { showToast("please write amount"); return; }
+
+    showLoader("Material Saving...");
+    try {
+      await addDoc(colRef, { user: u, item: i, price: Number(p), time: Date.now(), monthLabel: monthSelector.value });
+      document.getElementById(`item${u}`).value = ""; 
+      document.getElementById(`price${u}`).value = "";
+      hideLoader();
+    } catch {
+      hideLoader();
+      showToast("Error saving data");
+    }
   };
 
   window.downloadFullReport = async () => {
     if(allEntries.length === 0) return;
-    document.getElementById('loaderOverlay').style.display = 'flex';
+    showLoader("Generating Sorted Report...");
     const { jsPDF } = window.jspdf; const docPdf = new jsPDF();
     docPdf.setFontSize(18); docPdf.setTextColor(7, 94, 84);
     docPdf.text(`Kitchen Expense Report - ${monthSelector.value}`, 14, 20);
@@ -269,7 +301,7 @@
     });
     docPdf.setFontSize(16); docPdf.setTextColor(7, 94, 84);
     docPdf.text(`GRAND TOTAL: SAR ${document.getElementById('grandTotal').innerText}`, 14, currentY + 5);
-    setTimeout(() => { docPdf.save(`Kitchen_Report_${monthSelector.value}.pdf`); document.getElementById('loaderOverlay').style.display = 'none'; const x = document.getElementById("toast"); x.className = "show"; setTimeout(() => { x.className = ""; }, 3000); }, 1500);
+    setTimeout(() => { docPdf.save(`Kitchen_Report_${monthSelector.value}.pdf`); hideLoader(); showToast("Check download file in download folder"); }, 1500);
   };
 
   window.openEditModal = (id, name, price) => { itemToEdit = id; document.getElementById('editItemName').value = name; document.getElementById('editItemPrice').value = price; document.getElementById('editModal').style.display = 'flex'; };
