@@ -296,7 +296,6 @@
     return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
   }
 
-  // --- MESS TECHNICAL LOGIC ---
   async function listenMessBalance() {
     onSnapshot(doc(db, "messData", "haseebBalance"), (ds) => {
         const bal = ds.exists() ? ds.data().pending : 0;
@@ -340,7 +339,6 @@
       const priceNum = Number(p);
       await addDoc(colRef, { user: u, item: i, price: priceNum, time: Date.now(), monthLabel: monthSelector.value, editType: 'none' });
       
-      // If Haseeb adds mess, update balance
       if(u === 'Haseeb' && i.toLowerCase().trim() === 'mess') {
           const docRef = doc(db, "messData", "haseebBalance");
           const ds = await getDoc(docRef);
@@ -390,12 +388,10 @@
         else if (p !== oldItemPrice) type = 'amount';
         else if (n !== oldItemName) type = 'name';
         
-        // Update mess balance if it's Haseeb's mess entry
         if(currentUserRole === 'Haseeb' && oldItemName.toLowerCase().trim() === 'mess' && type !== 'none') {
             const docRef = doc(db, "messData", "haseebBalance");
             const ds = await getDoc(docRef);
             const currentTotalBal = ds.exists() ? ds.data().pending : 0;
-            // Subtract old price, add new price
             await setDoc(docRef, { pending: (currentTotalBal - oldItemPrice) + p });
         }
 
@@ -406,20 +402,31 @@
 
   window.openDelModal = (id) => { itemToDelete = id; document.getElementById('deleteModal').style.display = 'flex'; };
   window.closeDelModal = () => { document.getElementById('deleteModal').style.display = 'none'; };
+  
   document.getElementById('confirmDelete').onclick = async () => { 
     if(itemToDelete) {
-        // If it's Haseeb's mess entry, remove from pending balance before delete
-        if(currentUserRole === 'Haseeb') {
-            const dsItem = await getDoc(doc(db, "kitchenExpenses", itemToDelete));
-            if(dsItem.exists() && dsItem.data().item.toLowerCase().trim() === 'mess') {
-                const docRef = doc(db, "messData", "haseebBalance");
-                const dsBal = await getDoc(docRef);
-                const currentBal = dsBal.exists() ? dsBal.data().pending : 0;
-                await setDoc(docRef, { pending: currentBal - dsItem.data().price });
+        const id = itemToDelete;
+        itemToDelete = null;
+        closeDelModal(); // Modal foran band
+        showLoader("Deleting..."); // Loader shuru
+        
+        try {
+            if(currentUserRole === 'Haseeb') {
+                const dsItem = await getDoc(doc(db, "kitchenExpenses", id));
+                if(dsItem.exists() && dsItem.data().item.toLowerCase().trim() === 'mess') {
+                    const docRef = doc(db, "messData", "haseebBalance");
+                    const dsBal = await getDoc(docRef);
+                    const currentBal = dsBal.exists() ? dsBal.data().pending : 0;
+                    await setDoc(docRef, { pending: currentBal - dsItem.data().price });
+                }
             }
+            await deleteDoc(doc(db, "kitchenExpenses", id)); 
+            hideLoader(); // Loader khatam
+            showToast("Successfully Deleted"); // Toast message
+        } catch (e) {
+            hideLoader();
+            showToast("Error deleting item");
         }
-        await deleteDoc(doc(db, "kitchenExpenses", itemToDelete)); 
-        closeDelModal(); 
     } 
   };
 
