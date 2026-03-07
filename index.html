@@ -57,7 +57,7 @@
 </head>
 <body>
 
-<div id="loaderOverlay"><div class="spinner"></div><p id="loaderText" style="color: #075e54; font-weight: bold; margin-top: 10px;">Generating Sorted Report...</p></div>
+<div id="loaderOverlay"><div class="spinner"></div><p id="loaderText" style="color: #075e54; font-weight: bold; margin-top: 10px;">Loading...</p></div>
 <div id="toast"></div>
 
 <div id="loginPage">
@@ -146,6 +146,7 @@
   const userEmails = { "haseebnazar.malik@gmail.com": "Haseeb", "arsalan@gmail.com": "Arsalan", "aftab@gmail.com": "Aftab" };
   let currentUserRole = "", itemToDelete = null, itemToEdit = null;
   let allEntries = [];
+  let isInitialLoad = true;
 
   window.showToast = (msg) => {
     const x = document.getElementById("toast");
@@ -172,6 +173,9 @@
       document.getElementById('logoutBtn').style.display = (user.email === "haseebnazar.malik@gmail.com") ? "block" : "none";
       document.getElementById(`tab${currentUserRole}`)?.click();
       ['Haseeb', 'Arsalan', 'Aftab'].forEach(u => { document.getElementById(`input${u}`).style.display = (u === currentUserRole) ? "block" : "none"; });
+      
+      // Start initial loading spinner
+      if(isInitialLoad) showLoader("Loading...");
       filterData();
     } else { document.getElementById('loginPage').style.display = 'flex'; document.getElementById('mainApp').style.display = 'none'; }
   });
@@ -244,6 +248,12 @@
       allEntries = [];
       snap.forEach(ds => { if((ds.data().monthLabel || "Mar 2026") === monthSelector.value) allEntries.push({...ds.data()}); });
       document.getElementById('grandTotal').innerText = gt;
+
+      // Hide initial loader once data is fetched
+      if(isInitialLoad) {
+        hideLoader();
+        isInitialLoad = false;
+      }
     });
   };
 
