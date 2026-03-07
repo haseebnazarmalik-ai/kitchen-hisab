@@ -173,8 +173,6 @@
       document.getElementById('logoutBtn').style.display = (user.email === "haseebnazar.malik@gmail.com") ? "block" : "none";
       document.getElementById(`tab${currentUserRole}`)?.click();
       ['Haseeb', 'Arsalan', 'Aftab'].forEach(u => { document.getElementById(`input${u}`).style.display = (u === currentUserRole) ? "block" : "none"; });
-      
-      // Start initial loading spinner
       if(isInitialLoad) showLoader("Loading...");
       filterData();
     } else { document.getElementById('loginPage').style.display = 'flex'; document.getElementById('mainApp').style.display = 'none'; }
@@ -183,7 +181,6 @@
   window.handleLogin = async () => {
     const e = document.getElementById('loginEmail').value, p = document.getElementById('loginPassword').value;
     if(!e || !p) { showToast("Please enter email and password"); return; }
-    
     showLoader("Logging in...");
     try { 
       const userCredential = await signInWithEmailAndPassword(auth, e, p);
@@ -237,7 +234,9 @@
         for (const label in groups) {
           cont.innerHTML += `<div class="date-separator"><span>${label}</span></div>`;
           groups[label].items.forEach(item => {
-            cont.innerHTML += `<li><div class="item-info"><span class="item-name">${item.item}</span><span class="item-time">${new Date(item.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span></div><div class="item-amount">SAR ${item.price}</div><div class="action-btns">${(u === currentUserRole) ? `<button class="edit-text" onclick="openEditModal('${item.id}', '${item.item}', ${item.price})">Edit</button><button class="delete-text" onclick="openDelModal('${item.id}')">Delete</button>` : ''}</div></li>`;
+            const timeStr = new Date(item.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            const editedTag = item.edited ? `<span style="font-size: 11px; margin-left: 5px; font-weight: normal; color: #777;">Edited</span>` : '';
+            cont.innerHTML += `<li><div class="item-info"><span class="item-name">${item.item}</span><span class="item-time">${timeStr}${editedTag}</span></div><div class="item-amount">SAR ${item.price}</div><div class="action-btns">${(u === currentUserRole) ? `<button class="edit-text" onclick="openEditModal('${item.id}', '${item.item}', ${item.price})">Edit</button><button class="delete-text" onclick="openDelModal('${item.id}')">Delete</button>` : ''}</div></li>`;
           });
           if(groups[label].items.length > 1) {
             cont.innerHTML += `<div style="text-align: right; padding: 0 15px 10px; font-size: 12px; font-weight: bold; color: #075e54;">Day Total: SAR ${groups[label].total}</div>`;
@@ -248,12 +247,7 @@
       allEntries = [];
       snap.forEach(ds => { if((ds.data().monthLabel || "Mar 2026") === monthSelector.value) allEntries.push({...ds.data()}); });
       document.getElementById('grandTotal').innerText = gt;
-
-      // Hide initial loader once data is fetched
-      if(isInitialLoad) {
-        hideLoader();
-        isInitialLoad = false;
-      }
+      if(isInitialLoad) { hideLoader(); isInitialLoad = false; }
     });
   };
 
@@ -274,21 +268,15 @@
 
   window.addItem = async (u) => {
     const i = document.getElementById(`item${u}`).value, p = document.getElementById(`price${u}`).value;
-    
     if(!i && !p) { showToast("please write material and amount"); return; }
     if(!i) { showToast("please write material"); return; }
     if(!p) { showToast("please write amount"); return; }
-
     showLoader("Material Saving...");
     try {
-      await addDoc(colRef, { user: u, item: i, price: Number(p), time: Date.now(), monthLabel: monthSelector.value });
-      document.getElementById(`item${u}`).value = ""; 
-      document.getElementById(`price${u}`).value = "";
+      await addDoc(colRef, { user: u, item: i, price: Number(p), time: Date.now(), monthLabel: monthSelector.value, edited: false });
+      document.getElementById(`item${u}`).value = ""; document.getElementById(`price${u}`).value = "";
       hideLoader();
-    } catch {
-      hideLoader();
-      showToast("Error saving data");
-    }
+    } catch { hideLoader(); showToast("Error saving data"); }
   };
 
   window.downloadFullReport = async () => {
@@ -303,7 +291,7 @@
       if(userItems.length > 0) {
         docPdf.setFontSize(14); docPdf.setTextColor(0);
         docPdf.text(`${u.toUpperCase()} LIST:`, 14, currentY + 5);
-        const rows = userItems.map(d => [new Date(d.time).toLocaleDateString('en-GB'), d.item, `SAR ${d.price}`]);
+        const rows = userItems.map(d => [new Date(d.time).toLocaleDateString('en-GB'), d.item + (d.edited ? " (Edited)" : ""), `SAR ${d.price}`]);
         const userTotal = userItems.reduce((s, d) => s + Number(d.price), 0);
         docPdf.autoTable({ head: [['Date', 'Item', 'Amount']], body: rows, startY: currentY + 8, theme: 'grid', headStyles: { fillColor: [7, 94, 84] }, foot: [['', 'TOTAL', `SAR ${userTotal}`]], footStyles: { fillColor: [220, 248, 198], textColor: [0], fontStyle: 'bold' } });
         currentY = docPdf.lastAutoTable.finalY + 10;
@@ -316,7 +304,16 @@
 
   window.openEditModal = (id, name, price) => { itemToEdit = id; document.getElementById('editItemName').value = name; document.getElementById('editItemPrice').value = price; document.getElementById('editModal').style.display = 'flex'; };
   window.closeEditModal = () => { document.getElementById('editModal').style.display = 'none'; };
-  document.getElementById('confirmUpdate').onclick = async () => { const n = document.getElementById('editItemName').value, p = document.getElementById('editItemPrice').value; if(itemToEdit && n && p) { const id = itemToEdit; closeEditModal(); await updateDoc(doc(db, "kitchenExpenses", id), { item: n, price: Number(p) }); } };
+  
+  document.getElementById('confirmUpdate').onclick = async () => { 
+    const n = document.getElementById('editItemName').value, p = document.getElementById('editItemPrice').value; 
+    if(itemToEdit && n && p) { 
+        const id = itemToEdit; 
+        closeEditModal(); 
+        await updateDoc(doc(db, "kitchenExpenses", id), { item: n, price: Number(p), edited: true }); 
+    } 
+  };
+
   window.openDelModal = (id) => { itemToDelete = id; document.getElementById('deleteModal').style.display = 'flex'; };
   window.closeDelModal = () => { document.getElementById('deleteModal').style.display = 'none'; };
   document.getElementById('confirmDelete').onclick = async () => { if(itemToDelete) { const id = itemToDelete; itemToDelete = null; closeDelModal(); await deleteDoc(doc(db, "kitchenExpenses", id)); } };
