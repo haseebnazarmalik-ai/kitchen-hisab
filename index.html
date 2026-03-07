@@ -175,18 +175,30 @@
     onSnapshot(query(colRef, orderBy("time", "desc")), (snap) => {
       let gt = 0; allEntries = [];
       ['Haseeb', 'Arsalan', 'Aftab'].forEach(u => {
-        const cont = document.getElementById(`list${u}`); let ut = 0; cont.innerHTML = ""; let lastLabel = "";
+        const cont = document.getElementById(`list${u}`); 
+        let ut = 0; cont.innerHTML = ""; 
+        
+        let groups = {};
         snap.forEach(ds => {
           const d = ds.data();
-          if((d.monthLabel || "Mar 2026") === monthSelector.value) {
-            if(d.user === u) {
-                ut += Number(d.price);
-                const currentLabel = getDateLabel(d.time);
-                if (currentLabel !== lastLabel) { cont.innerHTML += `<div class="date-separator"><span>${currentLabel}</span></div>`; lastLabel = currentLabel; }
-                cont.innerHTML += `<li><div class="item-info"><span class="item-name">${d.item}</span><span class="item-time">${new Date(d.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span></div><div class="item-amount">SAR ${d.price}</div><div class="action-btns">${(u === currentUserRole) ? `<button class="edit-text" onclick="openEditModal('${ds.id}', '${d.item}', ${d.price})">Edit</button><button class="delete-text" onclick="openDelModal('${ds.id}')">Delete</button>` : ''}</div></li>`;
-            }
+          if((d.monthLabel || "Mar 2026") === monthSelector.value && d.user === u) {
+            const label = getDateLabel(d.time);
+            if(!groups[label]) groups[label] = { items: [], total: 0 };
+            groups[label].items.push({ id: ds.id, ...d });
+            groups[label].total += Number(d.price);
+            ut += Number(d.price);
           }
         });
+
+        for (const label in groups) {
+          cont.innerHTML += `<div class="date-separator"><span>${label}</span></div>`;
+          groups[label].items.forEach(item => {
+            cont.innerHTML += `<li><div class="item-info"><span class="item-name">${item.item}</span><span class="item-time">${new Date(item.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span></div><div class="item-amount">SAR ${item.price}</div><div class="action-btns">${(u === currentUserRole) ? `<button class="edit-text" onclick="openEditModal('${item.id}', '${item.item}', ${item.price})">Edit</button><button class="delete-text" onclick="openDelModal('${item.id}')">Delete</button>` : ''}</div></li>`;
+          });
+          if(groups[label].items.length > 1) {
+            cont.innerHTML += `<div style="text-align: right; padding: 0 15px 10px; font-size: 12px; font-weight: bold; color: #075e54;">Day Total: SAR ${groups[label].total}</div>`;
+          }
+        }
         document.getElementById(`total${u}`).innerText = ut; gt += ut;
       });
       allEntries = [];
