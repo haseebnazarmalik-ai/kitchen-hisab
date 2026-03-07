@@ -21,7 +21,7 @@
         .tabs { display: flex; background: #075e54; position: sticky; top: 45px; z-index: 100; }
         .tab { flex: 1; text-align: center; padding: 12px; color: #b1d4d0; font-weight: bold; cursor: pointer; border-bottom: 3px solid transparent; font-size: 13px; }
         .tab.active { color: white; border-bottom: 3px solid white; }
-        .content { display: none; padding: 12px; padding-bottom: 100px; }
+        .content { display: none; padding: 12px; padding-bottom: 120px; }
         .content.active { display: block; }
         .input-card { background: white; padding: 15px; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .input-card input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 15px; }
@@ -52,7 +52,13 @@
         .btn-cancel { flex: 1; padding: 12px; border-radius: 10px; background: #f0f0f0; border: none; font-weight: bold; color: #555; }
         .btn-confirm-del { flex: 1; padding: 12px; border-radius: 10px; background: #e53935; color: white; border: none; font-weight: bold; }
         .btn-confirm-edit { flex: 1; padding: 12px; border-radius: 10px; background: #25d366; color: white; border: none; font-weight: bold; }
-        .footer-fixed { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 15px; text-align: center; border-top: 1px solid #ddd; font-weight: bold; z-index: 100; font-size: 16px; }
+        .footer-fixed { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 15px; border-top: 1px solid #ddd; z-index: 100; display: flex; justify-content: center; align-items: center; min-height: 50px; transition: all 0.3s ease; }
+        .footer-content { width: 100%; display: flex; justify-content: center; align-items: center; padding: 0 15px; }
+        .footer-split { justify-content: space-between !important; }
+        .footer-label { font-weight: bold; font-size: 15px; color: #333; }
+        .mess-box { text-align: right; cursor: pointer; background: #fff3e0; padding: 5px 10px; border-radius: 8px; border: 1px solid #ffe0b2; }
+        .mess-title { font-size: 11px; color: #e65100; font-weight: bold; display: block; margin-bottom: -2px; }
+        .mess-amount { font-size: 14px; color: #bf360c; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -103,7 +109,26 @@
         <div id="listAftab"></div>
     </div>
 
-    <div class="footer-fixed">GRAND TOTAL: SAR <span id="grandTotal">0</span></div>
+    <div class="footer-fixed" id="appFooter">
+        <div class="footer-content" id="footerContainer">
+            <div class="footer-label">GRAND TOTAL: SAR <span id="grandTotal">0</span></div>
+            <div id="messSection" class="mess-box" style="display: none;" onclick="openMessModal()">
+                <span class="mess-title">MESS</span>
+                <span class="mess-amount">Pending: SAR <span id="messPending">0</span></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="messModal" class="modal-overlay">
+    <div class="modal-box">
+        <h3>Pay Amount</h3>
+        <input type="number" id="messPayInput" placeholder="Enter amount to pay">
+        <div class="modal-btns">
+            <button class="btn-cancel" onclick="closeMessModal()">Cancel</button>
+            <button class="btn-confirm-edit" onclick="processMessPayment()">Paid</button>
+        </div>
+    </div>
 </div>
 
 <div id="editModal" class="modal-overlay">
@@ -136,7 +161,7 @@
 
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-  import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc, updateDoc, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc, updateDoc, setDoc, getDoc, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
   const firebaseConfig = { apiKey: "AIzaSyAywmVNaLkyudJelZ-Gdx6gL1hydzxe2cg", authDomain: "haseeb-984fc.firebaseapp.com", projectId: "haseeb-984fc", storageBucket: "haseeb-984fc.firebasestorage.app", messagingSenderId: "868884894390", appId: "1:868884894390:web:f203e0bad5882fc709cc17" };
   const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app);
@@ -144,7 +169,7 @@
   const colRef = collection(db, "kitchenExpenses");
 
   const userEmails = { "haseebnazar.malik@gmail.com": "Haseeb", "arsalan@gmail.com": "Arsalan", "aftab@gmail.com": "Aftab" };
-  let currentUserRole = "", itemToDelete = null, itemToEdit = null, oldItemName = "", oldItemPrice = 0;
+  let currentUserRole = "", currentUserEmail = "", itemToDelete = null, itemToEdit = null, oldItemName = "", oldItemPrice = 0;
   let allEntries = [];
   let isInitialLoad = true;
 
@@ -166,6 +191,7 @@
 
   onAuthStateChanged(auth, (user) => {
     if (user) {
+      currentUserEmail = user.email;
       currentUserRole = userEmails[user.email] || "Viewer";
       document.getElementById('headerUserName').innerText = `, ${currentUserRole}`;
       document.getElementById('loginPage').style.display = 'none';
@@ -175,6 +201,7 @@
       ['Haseeb', 'Arsalan', 'Aftab'].forEach(u => { document.getElementById(`input${u}`).style.display = (u === currentUserRole) ? "block" : "none"; });
       if(isInitialLoad) showLoader("Loading...");
       filterData();
+      if(currentUserEmail === "haseebnazar.malik@gmail.com") listenMessBalance();
     } else { document.getElementById('loginPage').style.display = 'flex'; document.getElementById('mainApp').style.display = 'none'; }
   });
 
@@ -183,10 +210,8 @@
     if(!e || !p) { showToast("Please enter email and password"); return; }
     showLoader("Logging in...");
     try { 
-      const userCredential = await signInWithEmailAndPassword(auth, e, p);
-      const name = userEmails[userCredential.user.email] || "User";
+      await signInWithEmailAndPassword(auth, e, p);
       hideLoader();
-      showToast(`Welcome, ${name}! 🥘`);
     } catch { 
       hideLoader();
       showToast("Wrong email or password.");
@@ -271,6 +296,40 @@
     return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
   }
 
+  // --- MESS TECHNICAL LOGIC ---
+  async function listenMessBalance() {
+    onSnapshot(doc(db, "messData", "haseebBalance"), (ds) => {
+        const bal = ds.exists() ? ds.data().pending : 0;
+        const messSection = document.getElementById('messSection');
+        const footerContainer = document.getElementById('footerContainer');
+        document.getElementById('messPending').innerText = bal;
+
+        if(bal !== 0) {
+            messSection.style.display = 'block';
+            footerContainer.classList.add('footer-split');
+        } else {
+            messSection.style.display = 'none';
+            footerContainer.classList.remove('footer-split');
+        }
+    });
+  }
+
+  window.openMessModal = () => { document.getElementById('messModal').style.display = 'flex'; };
+  window.closeMessModal = () => { document.getElementById('messModal').style.display = 'none'; document.getElementById('messPayInput').value = ''; };
+  
+  window.processMessPayment = async () => {
+    const payVal = Number(document.getElementById('messPayInput').value);
+    if(!payVal) return;
+    showLoader("Processing Payment...");
+    const docRef = doc(db, "messData", "haseebBalance");
+    const ds = await getDoc(docRef);
+    const currentBal = ds.exists() ? ds.data().pending : 0;
+    await setDoc(docRef, { pending: currentBal - payVal });
+    closeMessModal();
+    hideLoader();
+    showToast("Payment Updated!");
+  };
+
   window.addItem = async (u) => {
     const i = document.getElementById(`item${u}`).value, p = document.getElementById(`price${u}`).value;
     if(!i && !p) { showToast("please write material and amount"); return; }
@@ -278,7 +337,17 @@
     if(!p) { showToast("please write amount"); return; }
     showLoader("Material Saving...");
     try {
-      await addDoc(colRef, { user: u, item: i, price: Number(p), time: Date.now(), monthLabel: monthSelector.value, editType: 'none' });
+      const priceNum = Number(p);
+      await addDoc(colRef, { user: u, item: i, price: priceNum, time: Date.now(), monthLabel: monthSelector.value, editType: 'none' });
+      
+      // If Haseeb adds mess, update balance
+      if(u === 'Haseeb' && i.toLowerCase().trim() === 'mess') {
+          const docRef = doc(db, "messData", "haseebBalance");
+          const ds = await getDoc(docRef);
+          const currentBal = ds.exists() ? ds.data().pending : 0;
+          await setDoc(docRef, { pending: currentBal + priceNum });
+      }
+
       document.getElementById(`item${u}`).value = ""; document.getElementById(`price${u}`).value = "";
       hideLoader();
     } catch { hideLoader(); showToast("Error saving data"); }
@@ -308,41 +377,51 @@
   };
 
   window.openEditModal = (id, name, price) => { 
-    itemToEdit = id; 
-    oldItemName = name; 
-    oldItemPrice = Number(price); 
-    document.getElementById('editItemName').value = name; 
-    document.getElementById('editItemPrice').value = price; 
+    itemToEdit = id; oldItemName = name; oldItemPrice = Number(price); 
+    document.getElementById('editItemName').value = name; document.getElementById('editItemPrice').value = price; 
     document.getElementById('editModal').style.display = 'flex'; 
   };
-  
   window.closeEditModal = () => { document.getElementById('editModal').style.display = 'none'; };
-  
   document.getElementById('confirmUpdate').onclick = async () => { 
     const n = document.getElementById('editItemName').value, p = Number(document.getElementById('editItemPrice').value); 
     if(itemToEdit && n && p) { 
         let type = 'none';
-        const nameChanged = (n !== oldItemName);
-        const priceChanged = (p !== oldItemPrice);
-
-        if (nameChanged && priceChanged) type = 'both';
-        else if (priceChanged) type = 'amount';
-        else if (nameChanged) type = 'name';
-
-        const id = itemToEdit; 
-        closeEditModal(); 
-        if (type !== 'none') {
-            await updateDoc(doc(db, "kitchenExpenses", id), { item: n, price: p, editType: type }); 
-        } else {
-            // If nothing changed, just close (or you can still update values to be safe)
-            await updateDoc(doc(db, "kitchenExpenses", id), { item: n, price: p }); 
+        if (n !== oldItemName && p !== oldItemPrice) type = 'both';
+        else if (p !== oldItemPrice) type = 'amount';
+        else if (n !== oldItemName) type = 'name';
+        
+        // Update mess balance if it's Haseeb's mess entry
+        if(currentUserRole === 'Haseeb' && oldItemName.toLowerCase().trim() === 'mess' && type !== 'none') {
+            const docRef = doc(db, "messData", "haseebBalance");
+            const ds = await getDoc(docRef);
+            const currentTotalBal = ds.exists() ? ds.data().pending : 0;
+            // Subtract old price, add new price
+            await setDoc(docRef, { pending: (currentTotalBal - oldItemPrice) + p });
         }
+
+        await updateDoc(doc(db, "kitchenExpenses", itemToEdit), { item: n, price: p, editType: type }); 
+        closeEditModal();
     } 
   };
 
   window.openDelModal = (id) => { itemToDelete = id; document.getElementById('deleteModal').style.display = 'flex'; };
   window.closeDelModal = () => { document.getElementById('deleteModal').style.display = 'none'; };
-  document.getElementById('confirmDelete').onclick = async () => { if(itemToDelete) { const id = itemToDelete; itemToDelete = null; closeDelModal(); await deleteDoc(doc(db, "kitchenExpenses", id)); } };
+  document.getElementById('confirmDelete').onclick = async () => { 
+    if(itemToDelete) {
+        // If it's Haseeb's mess entry, remove from pending balance before delete
+        if(currentUserRole === 'Haseeb') {
+            const dsItem = await getDoc(doc(db, "kitchenExpenses", itemToDelete));
+            if(dsItem.exists() && dsItem.data().item.toLowerCase().trim() === 'mess') {
+                const docRef = doc(db, "messData", "haseebBalance");
+                const dsBal = await getDoc(docRef);
+                const currentBal = dsBal.exists() ? dsBal.data().pending : 0;
+                await setDoc(docRef, { pending: currentBal - dsItem.data().price });
+            }
+        }
+        await deleteDoc(doc(db, "kitchenExpenses", itemToDelete)); 
+        closeDelModal(); 
+    } 
+  };
 
   window.openTab = (e, n) => {
     let c = document.getElementsByClassName("content"), t = document.getElementsByClassName("tab");
